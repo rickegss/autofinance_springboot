@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    environment:
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      - db
