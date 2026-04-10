@@ -28,15 +28,23 @@ public class AuthController {
 
     @PostMapping("/register")
     public String registerUser(@Valid @ModelAttribute("user") UserDTO userDTO, BindingResult result){
+        if(!userDTO.getPassword().equals(userDTO.getConfirmPassword())){
+            result.rejectValue("confirmPassword", "error.user", "As senhas não coincidem");
+        }
         if(result.hasErrors()){
             return "register";
         }
-        User user = User.builder()
-                .email(userDTO.getEmail())
-                .password(userDTO.getPassword())
-                .build();
 
-        userService.register(user);
+        try {
+            User user = User.builder()
+                    .email(userDTO.getEmail())
+                    .password(userDTO.getPassword())
+                    .build();
+            userService.register(user);
+        } catch(IllegalArgumentException e){
+            result.rejectValue("email", "error.user", "Este email já está em uso.");
+            return "register";
+        }
         return "redirect:/login?success";
 
     }

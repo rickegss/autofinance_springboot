@@ -1,6 +1,5 @@
 package com.rickegss.autofinance.config;
 
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,7 +24,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/register", "/css/**", "/images/**").permitAll()
+                        .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/svg/**", "/assets/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -37,5 +36,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 }

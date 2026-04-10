@@ -14,6 +14,9 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User register(User user){
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new IllegalArgumentException("Email já cadastrado.");
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }

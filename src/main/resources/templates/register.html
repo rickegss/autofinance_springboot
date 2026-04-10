@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Autofinance - Registro</title>
+</head>
+<body>
+    <div class="container">
+        <div class="image-side">
+        </div>
+        <div class="form-side">
+            <div class="header-icon header-icon--row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="12" width="4" height="10"></rect>
+                    <rect x="9" y="6" width="4" height="16"></rect>
+                    <rect x="16" y="9" width="4" height="13"></rect>
+                </svg>
+                <h2>Registre-se</h2>
+            </div>
+            <form th:action="@{/register}" th:object="${user}" method="POST">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" th:field="*{email}" placeholder="seu@email.com">
+                    <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" th:field="*{password}">
+                    <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirme a senha</label>
+                    <input type="password" id="confirm-password" th:field="*{confirmPassword}">
+                    <span th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}" class="text-error"></span>
+                </div>
+                <div class="btn-register-container">
+                    <button type="submit">Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
