@@ -34,4 +34,5 @@ build/
 
 
 .env
-startup_guide.txt
+**/startup_guide.txt
+.txt
