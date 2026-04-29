@@ -29,7 +29,7 @@ public class SecurityConfig {
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/dashboard", true)
+                        .defaultSuccessUrl("/welcome", true)
                         .permitAll()
                 )
                 .logout(LogoutConfigurer::permitAll);
