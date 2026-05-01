@@ -3,30 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { poppins: ['Poppins', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { opacity: 0; transition: opacity 0.3s ease; }
+        body.loaded { opacity: 1; }
+    </style>
     <title>Autofinance - Bem Vindo</title>
 </head>
-<body class="welcome">
-<div class="welcome-wrapper">
-    <div class="welcome-header">
-        <h1>Autofinance</h1>
-        <svg width="42" height="42" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+<body class="font-poppins min-h-screen flex flex-col items-center justify-center px-12 py-8"
+      style="background: linear-gradient(180deg, #ffffff 10%, #01017b 90%)">
+
+<div class="w-[1000px] max-w-full">
+    <div class="flex items-center gap-2.5 mb-6">
+        <h1 class="text-[3.2rem] font-bold text-[#0c00eb]">Autofinance</h1>
+        <svg class="text-[#0c00eb] w-[42px] h-[42px]" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
             <polygon points="19,2 35,11 35,27 19,36 3,27 3,11" fill="none" stroke="currentColor" stroke-width="3.8"/>
             <line x1="19" y1="2" x2="19" y2="36" stroke="currentColor" stroke-width="2.5"/>
             <line x1="3" y1="11" x2="35" y2="27" stroke="currentColor" stroke-width="2.5"/>
             <line x1="35" y1="11" x2="3" y2="27" stroke="currentColor" stroke-width="2.5"/>
         </svg>
     </div>
-    <div class="welcome-card">
-        <h2 class="welcome-title">Seja bem vindo!</h2>
-        <div class="welcome-box">
-            <p>Vamos entender sua vida financeira para ajudar você a atingir seus objetivos, através de simples perguntas.</p>
+    <div class="bg-white w-full rounded-[20px] shadow-[0_8px_32px_rgba(1,1,54,0.25)] p-[50px]">
+        <h2 class="text-[3rem] font-extrabold text-[#1a1aff] text-center mb-8">Seja bem vindo!</h2>
+        <div class="bg-[rgba(230,230,237,0.696)] rounded-[20px] px-6 py-7 mb-8 shadow-[0_8px_32px_rgba(1,1,54,0.25)]">
+            <p class="text-[1.8rem] font-[450] text-[#00000c] leading-relaxed">
+                Vamos entender sua vida financeira para ajudar você a atingir seus objetivos, através de simples perguntas.
+            </p>
         </div>
-        <div class="welcome-footer">
-            <a href="first_config.html" class="btn-start">Vamos começar!</a>
+        <div class="flex justify-end">
+            <a th:href="@{/first-config}"
+               class="bg-[#0c00eb] text-white border-none rounded-[20px] py-[14px] px-[38px] text-[1.5rem] font-semibold cursor-pointer no-underline inline-block shadow-[0_8px_32px_rgba(1,1,54,0.25)] transition-all duration-200 hover:bg-[#443ce1] hover:scale-[1.03]">
+                Vamos começar!
+            </a>
         </div>
     </div>
 </div>
+
+<script th:src="@{/js/transitions.js}"></script>
 </body>
 </html>
