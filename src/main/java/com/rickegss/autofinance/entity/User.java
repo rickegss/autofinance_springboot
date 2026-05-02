@@ -32,6 +32,10 @@ public class User {
     @Builder.Default
     private List<String> preferredCategories = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Transaction> transactions = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     @Column(name = "financial_goal")
     private FinancialGoal financialGoal;
