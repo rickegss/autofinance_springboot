@@ -323,7 +323,7 @@ public class User {
     private FinancialGoal financialGoal;
 
     @Column(name = "monthly_income", precision = 12, scale = 2)
-    private BigDecimal monthly_income;
+    private BigDecimal monthlyIncome;
 
 }
 
@@ -423,7 +423,7 @@ public class UserServiceImpl implements UserService{
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
 
         user.setFinancialGoal(goal);
-        user.setMonthly_income(income);
+        user.setMonthlyIncome(income);
         userRepository.save(user);
     }
 }
@@ -854,7 +854,7 @@ spring.jpa.properties.hibernate.dialec=org.hibernate.dialect.PostgreSQLDialect
                 <span class="w-[26px] h-[26px] rounded-full flex items-center justify-center text-[0.85rem] font-semibold bg-[#ede9fe] text-[#5b21b6] flex-shrink-0">
                     <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                 </span>
-                <span class="text-[0.95rem] font-medium text-[#5b21b6]">Categories</span>
+                <span class="text-[0.95rem] font-medium text-[#5b21b6]">Categorias</span>
             </li>
             <li class="flex items-center gap-3 px-[14px] py-[10px] rounded-xl bg-[#5b21b6] cursor-default">
                 <span class="w-[26px] h-[26px] rounded-full flex items-center justify-center text-[0.85rem] font-semibold bg-white text-[#5b21b6] flex-shrink-0">2</span>
@@ -1004,7 +1004,7 @@ spring.jpa.properties.hibernate.dialec=org.hibernate.dialect.PostgreSQLDialect
         body { opacity: 0; transition: opacity 0.3s ease; }
         body.loaded { opacity: 1; }
     </style>
-    <title>Autofinance - Summary</title>
+    <title>Autofinance - Resumo</title>
 </head>
 <body class="font-poppins min-h-screen flex flex-col" style="background: linear-gradient(135deg, #c8cdd8 0%, #1a3a7a 100%)">
 
@@ -1031,17 +1031,17 @@ spring.jpa.properties.hibernate.dialec=org.hibernate.dialect.PostgreSQLDialect
                 <span class="w-[26px] h-[26px] rounded-full flex items-center justify-center text-[0.85rem] font-semibold bg-[#ede9fe] text-[#5b21b6] flex-shrink-0">
                     <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                 </span>
-                <span class="text-[0.95rem] font-medium text-[#5b21b6]">Categories</span>
+                <span class="text-[0.95rem] font-medium text-[#5b21b6]">Categorias</span>
             </li>
             <li class="flex items-center gap-3 px-[14px] py-[10px] rounded-xl cursor-default">
                 <span class="w-[26px] h-[26px] rounded-full flex items-center justify-center text-[0.85rem] font-semibold bg-[#ede9fe] text-[#5b21b6] flex-shrink-0">
                     <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                 </span>
-                <span class="text-[0.95rem] font-medium text-[#5b21b6]">Details</span>
+                <span class="text-[0.95rem] font-medium text-[#5b21b6]">Detalhes</span>
             </li>
             <li class="flex items-center gap-3 px-[14px] py-[10px] rounded-xl bg-[#5b21b6] cursor-default">
                 <span class="w-[26px] h-[26px] rounded-full flex items-center justify-center text-[0.85rem] font-semibold bg-white text-[#5b21b6] flex-shrink-0">3</span>
-                <span class="text-[0.95rem] font-medium text-white">Summary</span>
+                <span class="text-[0.95rem] font-medium text-white">Resumo</span>
             </li>
         </ul>
     </aside>
