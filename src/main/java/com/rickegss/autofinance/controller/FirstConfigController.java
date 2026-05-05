@@ -2,7 +2,7 @@ package com.rickegss.autofinance.controller;
 
 import com.rickegss.autofinance.entity.Category;
 import com.rickegss.autofinance.entity.User;
-import com.rickegss.autofinance.repository.UserRepository;
+import com.rickegss.autofinance.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FirstConfigController {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @GetMapping
     public String firstConfig(Model model) {
@@ -60,9 +60,7 @@ public class FirstConfigController {
 
     @GetMapping("/summary")
     public String summary(Principal principal, Model model){
-        User user = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
-
+        User user = userService.findByEmail(principal.getName());
         model.addAttribute("user", user);
         return "summary";
     }

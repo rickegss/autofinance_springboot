@@ -47,4 +47,10 @@ public class UserServiceImpl implements UserService{
         user.setMonthlyIncome(income);
         userRepository.save(user);
     }
+
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+    }
 }

@@ -3,6 +3,7 @@ package com.rickegss.autofinance.controller;
 
 import com.rickegss.autofinance.entity.User;
 import com.rickegss.autofinance.repository.UserRepository;
+import com.rickegss.autofinance.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,12 +15,11 @@ import java.security.Principal;
 @RequiredArgsConstructor
 public class DashboardController {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @GetMapping("/dashboard")
     public String dashboard(Principal principal, Model model){
-        User user = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+        User user = userService.findByEmail(principal.getName());
         model.addAttribute("user", user);
         return "dashboard";
     }

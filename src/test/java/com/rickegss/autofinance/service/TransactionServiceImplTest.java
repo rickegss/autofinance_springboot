@@ -13,8 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.junit.jupiter.api.DisplayName;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -99,8 +99,8 @@ class TransactionServiceImplTest {
 
         // Act & Assert
         assertThatThrownBy(() -> transactionService.create("unknown@test.com", dto))
-              .isInstanceOf(IllegalArgumentException.class)
-              .hasMessage("Usuário não encontrado.");
+              .isInstanceOf(UsernameNotFoundException.class)
+              .hasMessage("Usuário não encontrado");
 
         verify(transactionRepository, never()).save(any());
     }

@@ -11,4 +11,5 @@ public interface UserService {
     User register(User user);
     void saveUserCategories(String email, List<String> categories);
     void saveUserDetails(String email, FinancialGoal goal, BigDecimal income);
+    User findByEmail(String email);
 }
