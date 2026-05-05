@@ -12,12 +12,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.junit.jupiter.api.DisplayName;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -52,8 +55,10 @@ class TransactionServiceImplTest {
                 LocalDate.now()
         );
     }
+    
 
     @Test
+    @DisplayName("Should create successfully a Transaction")
     void create_shouldCreateTransactionSuccessfully() {
         // Arrange
         when(userRepository.findByEmail("user@test.com"))
@@ -82,7 +87,83 @@ class TransactionServiceImplTest {
         assertThat(result.getUser()).isEqualTo(user);
 
         verify(transactionRepository, times(1)).save(any(Transaction.class));
+    }
+    
 
+    @Test
+    @DisplayName("Should throw UserNotFoundException when requested by inhexistent user")
+    void create_shouldThrowExceptionWhenUserNotFound() {
+        // Arrange
+        when(userRepository.findByEmail("unknown@test.com"))
+            .thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> transactionService.create("unknown@test.com", dto))
+              .isInstanceOf(IllegalArgumentException.class)
+              .hasMessage("Usuário não encontrado.");
+
+        verify(transactionRepository, never()).save(any());
+    }
+    
+
+    @Test
+    @DisplayName("Should delete successfully a transaction by the own user")
+    void delete_shouldDeleteSuccessfully() {
+        // Arrange
+        Transaction transaction = Transaction.builder()
+            .id(1L)
+            .user(user)
+            .build();
+
+        when(transactionRepository.findById(1L))
+            .thenReturn(Optional.of(transaction));
+
+        // Act
+        transactionService.delete(1L, "user@test.com");
+
+        // Assert
+        verify(transactionRepository, times(1)).delete(transaction);
     }
 
+
+    @Test
+    @DisplayName("Should throw AccessDeniedException when user is not the transaction owner")
+    void delete_shouldThrowAccessDeniedWhenNotOwner() {
+        // Arrange
+        User otherUser = User.builder()
+            .id(2L)
+            .email("other@test.com")
+            .build();
+
+        Transaction transaction = Transaction.builder()
+            .id(1L)
+            .user(otherUser)
+            .build();
+
+        when(transactionRepository.findById(1L))
+            .thenReturn(Optional.of(transaction));
+
+        // Act & Assert
+        assertThatThrownBy(() ->
+               transactionService.delete(1L, "user@test.com"))
+                .isInstanceOf(AccessDeniedException.class);
+
+        verify(transactionRepository, never()).delete(any());
+   }
+
+   @Test
+   @DisplayName("Should throw TransactionNotFoundException when requested inhexistent transaction")
+   void delete_shouldThrowExceptionWhenTransactionNotFound() {
+       // Arrange
+       when(transactionRepository.findById(99L))
+           .thenReturn(Optional.empty());
+
+       // Act & Assert
+       assertThatThrownBy(() ->
+              transactionService.delete(99L, "user@test.com"))
+              .isInstanceOf(IllegalArgumentException.class)
+              .hasMessage("Transação não encontrada");
+
+       verify(transactionRepository, never()).delete(any());
+   }
 }
