@@ -2,7 +2,6 @@ package com.rickegss.autofinance.controller;
 
 
 import com.rickegss.autofinance.entity.User;
-import com.rickegss.autofinance.repository.UserRepository;
 import com.rickegss.autofinance.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
