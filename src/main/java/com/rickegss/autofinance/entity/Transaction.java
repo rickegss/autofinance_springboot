@@ -36,6 +36,12 @@ public class Transaction {
     @Column(nullable = false)
     private LocalDate date;
 
+    @Column(name = "is_recurring")
+    private Boolean recurring = false;
+
+    @Column(name = "recurring_day")
+    private Integer recurringDay;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore

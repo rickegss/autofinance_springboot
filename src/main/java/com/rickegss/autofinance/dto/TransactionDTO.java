@@ -24,5 +24,8 @@ public record TransactionDTO (
 
     @NotNull(message = "A data é obrigatória")
     @PastOrPresent(message = "A data não pode ser futura")
-    LocalDate date
+    LocalDate date,
+    Boolean recurring,
+    Integer recurringDay,
+    LocalDate recurringEndDate
 ) {}
