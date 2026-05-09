@@ -3,13 +3,25 @@ services:
     image: postgres
     environment:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=postgres
+      - POSTGRES_DB=autofinance
     ports:
-      - "5432:5432"
-
+      - "5433:5432"
   app:
     build: .
     environment:
       - DB_PASSWORD=${DB_PASSWORD}
+      - SPRING_PROFILES_ACTIVE=prod
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@autofinance.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "15433:80"
     depends_on:
       - db

@@ -56,7 +56,10 @@ public class TransactionControllerIntegrationTest {
                 BigDecimal.valueOf(1200.00),
                 TransactionType.DESPESA,
                 "Moradia",
-                LocalDate.now()
+                LocalDate.now(),
+                false,
+                null,
+                null
         );
 
         mockMvc.perform(post("/api/transactions")
@@ -74,11 +77,14 @@ public class TransactionControllerIntegrationTest {
     @WithMockUser(username = "teste@integrador.com")
     void createTransaction_withInvalidData_shouldReturnBadRequest() throws Exception {
         TransactionDTO dto = new TransactionDTO(
-                null,   // description
-                null,   // amount
-                null,   // type
-                null,   // category
-                null    // date
+                null,
+                null,
+                null,
+                null,
+                null,
+                false,
+                null,
+                null
         );
 
         mockMvc.perform(post("/api/transactions")
@@ -97,7 +103,10 @@ public class TransactionControllerIntegrationTest {
                 BigDecimal.valueOf(5000.00),
                 TransactionType.RECEITA,
                 "Trabalho",
-                LocalDate.now()
+                LocalDate.now(),
+                false,
+                null,
+                null
         );
 
         mockMvc.perform(post("/api/transactions")

@@ -19,8 +19,19 @@ public class FirstConfigController {
 
     private final UserService userService;
 
+    private boolean isConfigComplete(Principal principal) {
+        User user = userService.findByEmail(principal.getName());
+        return user.getFinancialGoal() != null
+                && user.getMonthlyIncome() != null
+                && !user.getPreferredCategories().isEmpty();
+    }
+
+
     @GetMapping
-    public String firstConfig(Model model) {
+    public String firstConfig(Principal principal, Model model) {
+        if (isConfigComplete(principal)) {
+            return "redirect:/dashboard";
+        }
         List<Category> categories = List.of(
                 new Category("Aluguel", "home"),
                 new Category("Energia", "zap"),
@@ -54,12 +65,18 @@ public class FirstConfigController {
     }
 
     @GetMapping("/details")
-    public String details() {
+    public String details(Principal principal) {
+        if (isConfigComplete(principal)) {
+            return "redirect:/dashboard";
+        }
         return "details";
     }
 
     @GetMapping("/summary")
     public String summary(Principal principal, Model model){
+        if (isConfigComplete(principal)) {
+            return "redirect:/dashboard";
+        }
         User user = userService.findByEmail(principal.getName());
         model.addAttribute("user", user);
         return "summary";

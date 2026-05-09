@@ -17,8 +17,14 @@ public class DashboardController {
     private final UserService userService;
 
     @GetMapping("/dashboard")
-    public String dashboard(Principal principal, Model model){
+    public String dashboard(Principal principal, Model model) {
         User user = userService.findByEmail(principal.getName());
+        boolean isConfigComplete = user.getFinancialGoal() != null
+                && user.getMonthlyIncome() != null
+                && !user.getPreferredCategories().isEmpty();
+        if (!isConfigComplete) {
+            return "redirect:/welcome";
+        }
         model.addAttribute("user", user);
         return "dashboard";
     }

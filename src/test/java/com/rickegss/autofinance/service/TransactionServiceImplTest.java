@@ -52,7 +52,10 @@ class TransactionServiceImplTest {
                 BigDecimal.valueOf(1200.00),
                 TransactionType.DESPESA,
                 "Moradia",
-                LocalDate.now()
+                LocalDate.now(),
+                false,
+                null,
+                null
         );
     }
     

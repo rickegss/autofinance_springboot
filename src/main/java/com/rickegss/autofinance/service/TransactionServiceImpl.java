@@ -36,6 +36,8 @@ public class TransactionServiceImpl implements TransactionService {
                 .type(dto.type())
                 .category(dto.category())
                 .date(dto.date())
+                .recurring(dto.recurring())
+                .recurringDay(dto.recurringDay())
                 .user(user)
                 .build();
 
