@@ -38,6 +38,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .date(dto.date())
                 .recurring(dto.recurring())
                 .recurringDay(dto.recurringDay())
+                .recurringEndDate(dto.recurringEndDate())
                 .user(user)
                 .build();
 

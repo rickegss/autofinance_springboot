@@ -16,8 +16,11 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findByUserOrderByDateDesc(User user);
     List<Transaction> findByUserAndDateBetweenOrderByDateDesc(User user, LocalDate start, LocalDate end);
     List<Transaction> findByUserAndTypeOrderByDateDesc(User user, TransactionType type);
+    boolean existsByUserAndDateAndAmountAndTypeAndCategory(User user, LocalDate date, BigDecimal amount, TransactionType type, String category);
 
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.user = :user AND t.type = :type AND t.date BETWEEN :start AND :end")
     BigDecimal sumByUserAndTypeAndDateBetween(@Param("user") User user, @Param("type") TransactionType type, @Param("start") LocalDate start, @Param("end") LocalDate end);
 
+    @Query("SELECT t FROM Transaction t WHERE t.recurring = true AND (t.recurringEndDate IS NULL OR t.recurringEndDate >= CURRENT_DATE)")
+    List<Transaction> findAllActiveRecurring();
 }
