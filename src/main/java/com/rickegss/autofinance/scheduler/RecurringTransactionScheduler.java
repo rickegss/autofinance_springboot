@@ -12,8 +12,7 @@ import org.springframework.stereotype.Component;
 public class RecurringTransactionScheduler {
     private final RecurringTransactionService recurringTransactionService;
 
-    // @Scheduled(cron = "0 0 0 * * *")
-    @Scheduled(fixedDelay = 60000)
+    @Scheduled(cron = "0 0 0 * * *")
     public void execute() {
         log.info("Iniciando geração de transações recorrentes");
         recurringTransactionService.generateRecurringTransactions();

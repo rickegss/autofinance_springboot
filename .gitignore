@@ -35,4 +35,29 @@ build/
 
 .env
 **/startup_guide.txt
-.txt
+*.txt
+# Logs
+*.log
+logs/
+log/
+
+# Arquivos compactados
+*.gz
+*.zip
+*.tar
+*.rar
+*.7z
+
+# Outros comuns
+.target/
+*.class
+*.jar
+*.war
+*.nar
+*.ear
+.mvn/
+mvnw
+mvnw.cmd
+*.iml
+.idea/
+*.DS_Store

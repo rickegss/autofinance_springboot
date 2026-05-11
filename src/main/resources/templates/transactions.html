@@ -26,7 +26,6 @@
             gap: 10px;
             padding: 10px 16px;
             border-radius: 12px;
-            cursor: pointer;
             font-size: 0.9rem;
             font-weight: 500;
             color: #64748b;
@@ -96,14 +95,14 @@
     </nav>
 
     <div class="mt-auto pt-4 border-t border-[#f0f2f8]">
-        <div class="flex items-center gap-3 px-2 py-3 rounded-xl hover:bg-[#f0f2f8] cursor-pointer transition-colors mb-2">
+        <a href="/profile" class="flex items-center gap-3 px-2 py-3 rounded-xl hover:bg-[#f0f2f8] transition-colors mb-2 no-underline">
             <div class="w-9 h-9 rounded-full bg-[#1a1aff] flex items-center justify-center text-white font-bold text-sm flex-shrink-0" id="userAvatar">U</div>
             <div class="flex flex-col min-w-0">
                 <span class="text-[0.8rem] font-semibold text-[#1a1a2e] truncate" id="userEmailDisplay">usuário</span>
                 <span class="text-[0.72rem] text-[#666]">Ver perfil</span>
             </div>
             <i data-lucide="chevron-right" class="w-4 h-4 text-[#aaa] ml-auto flex-shrink-0"></i>
-        </div>
+        </a>
     </div>
 </aside>
 
@@ -146,7 +145,7 @@
             <i data-lucide="x" class="w-5 h-5"></i>
         </button>
         <h3 class="text-xl font-bold text-[#1a1a2e] mb-4">Novo lançamento</h3>
-        <form id="transactionForm">
+        <form id="transactionForm" data-spa>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Descrição (opcional)</label>
                 <input type="text" id="descriptionInput" class="w-full border border-gray-300 rounded-lg px-4 py-2">
@@ -202,19 +201,16 @@
     const form = document.getElementById('transactionForm');
     const messageDiv = document.getElementById('messageDiv');
 
-    // Elementos da recorrência
     const recurringCheckbox = document.getElementById('recurringCheckbox');
     const recurringDayContainer = document.getElementById('recurringDayContainer');
     const recurringDayInput = document.getElementById('recurringDayInput');
 
-    // Lista de categorias
     const categories = [
         "Aluguel","Energia","Água","Gás","Internet","Transporte","Alimentação","Saúde","Educação","Lazer",
         "Assinaturas","Compras","Moda","Pet","Hobby","Casa","Viagem","Presentes","Investimentos","Empréstimos",
         "Seguro","Impostos","Poupança","Outros"
     ];
 
-    // Preencher select de categorias
     const categorySelect = document.getElementById('categorySelect');
     categories.forEach(cat => {
         const option = document.createElement('option');
@@ -228,7 +224,6 @@
 
     const currencyFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
-    // Função utilitária
     function escapeHtml(str) {
         if (!str) return '';
         return str.replace(/[&<>]/g, function(m) {
@@ -246,7 +241,6 @@
         setTimeout(() => messageDiv.classList.add('hidden'), 4000);
     }
 
-    // Controle do checkbox de recorrência
     recurringCheckbox.addEventListener('change', () => {
         if (recurringCheckbox.checked) {
             recurringDayContainer.classList.remove('hidden');
@@ -270,35 +264,36 @@
         }
     }
 
-    function deleteTransaction(id) {
-        fetch(`/api/transactions/${id}`, {
-            method: 'DELETE',
-            headers: { [csrfHeader]: csrfToken }
-        })
-        .then(res => {
+    async function deleteTransaction(id) {
+        try {
+            const res = await fetch(`/api/transactions/${id}`, {
+                method: 'DELETE',
+                headers: { [csrfHeader]: csrfToken }
+            });
             if (res.ok) {
                 showMessage('Lançamento excluído com sucesso!', 'success');
-                loadTransactions();
+                await loadTransactions();
             } else {
                 showMessage('Falha ao excluir lançamento', 'error');
             }
-        })
-        .catch(() => showMessage('Erro de conexão', 'error'));
+        } catch {
+            showMessage('Erro de conexão', 'error');
+        }
     }
 
-    function loadTransactions() {
-        fetch('/api/transactions', {
-            headers: { [csrfHeader]: csrfToken }
-        })
-        .then(res => {
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            return res.json();
-        })
-        .then(transactions => {
+    async function loadTransactions() {
+        try {
+            const response = await fetch('/api/transactions', {
+                headers: { [csrfHeader]: csrfToken }
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const transactions = await response.json();
+
             if (!transactions.length) {
                 tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">Nenhum lançamento encontrado.</td></tr>';
                 return;
             }
+
             let html = '';
             transactions.forEach(t => {
                 const amountClass = t.type === 'RECEITA' ? 'text-green-600' : 'text-red-600';
@@ -324,15 +319,15 @@
             tbody.innerHTML = html;
             lucide.createIcons();
             attachDeleteEvents();
-        })
-        .catch(err => {
+            return true; // sucesso
+        } catch (err) {
             console.error('Erro ao carregar lançamentos:', err);
             tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-red-500">Falha ao carregar lançamentos.</td></tr>';
             showMessage('Erro ao carregar lançamentos', 'error');
-        });
+            return false;
+        }
     }
 
-    // Abrir modal
     document.getElementById('newTransactionBtn').onclick = () => {
         modal.classList.remove('hidden');
         form.reset();
@@ -341,13 +336,14 @@
         recurringDayContainer.classList.add('hidden');
         recurringDayInput.value = '';
     };
-
     document.getElementById('closeModalBtn').onclick = () => modal.classList.add('hidden');
     document.getElementById('cancelModalBtn').onclick = () => modal.classList.add('hidden');
 
-    // Envio do formulário
-    form.onsubmit = (e) => {
-        e.preventDefault();
+    form.onsubmit = async (e) => {
+    e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Salvando...';
 
         const description = document.getElementById('descriptionInput').value.trim();
         const amount = parseFloat(document.getElementById('amountInput').value);
@@ -361,65 +357,78 @@
         }
 
         const newTransaction = {
-            description,
-            amount,
-            type,
-            category,
-            date,
+            description, amount, type, category, date,
             recurring: recurringCheckbox.checked,
             recurringDay: recurringCheckbox.checked ? parseInt(recurringDayInput.value) : null,
             recurringEndDate: document.getElementById('recurringEndDate').value || null
         };
 
-        // Validação adicional para recorrência
         if (newTransaction.recurring && (!newTransaction.recurringDay || newTransaction.recurringDay < 1 || newTransaction.recurringDay > 31)) {
             showMessage('Para transações recorrentes, informe um dia do mês válido (1-31)', 'error');
             return;
         }
 
-        fetch('/api/transactions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                [csrfHeader]: csrfToken
-            },
-            body: JSON.stringify(newTransaction)
-        })
-        .then(res => {
-            if (!res.ok) {
-                if (res.status === 400) {
-                    return res.json().then(err => { throw new Error(err.message || 'Dados inválidos'); });
-                }
-                throw new Error('Falha ao salvar lançamento');
-            }
-            return res.json();
-        })
-        .then(() => {
-            modal.classList.add('hidden');
+        try {
+            const response = await fetch('/api/transactions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+                body: JSON.stringify(newTransaction)
+            });
+            if (!response.ok) throw new Error(await response.text() || 'Erro');
+
             showMessage('Lançamento criado com sucesso!', 'success');
-            loadTransactions();
-        })
-        .catch(err => {
+            modal.classList.add('hidden');
+
+            // Tenta recarregar a tabela. Se falhar, recarrega a página inteira.
+            const success = await loadTransactions();
+            if (!success) {
+                window.location.reload();
+            }
+
+            // Limpa o formulário
+            form.reset();
+            document.getElementById('dateInput').value = today;
+            recurringCheckbox.checked = false;
+            recurringDayContainer.classList.add('hidden');
+            recurringDayInput.value = '';
+            document.getElementById('recurringEndDate').value = '';
+        } catch (err) {
             console.error(err);
             showMessage(err.message, 'error');
             modal.classList.add('hidden');
-        });
+            // Se erro crítico, recarrega também
+            if (err.message.includes('HTTP') || err.message.includes('Network')) {
+                window.location.reload();
+            }
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Salvar';
+        }
     };
 
-    // Carregar dados do usuário
-    fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } })
-        .then(res => res.json())
-        .then(user => {
-            document.getElementById('userAvatar').textContent = user.email.charAt(0).toUpperCase();
-            document.getElementById('userEmailDisplay').textContent = user.email;
-        })
-        .catch(() => {
-            document.getElementById('userAvatar').textContent = 'U';
-            document.getElementById('userEmailDisplay').textContent = 'Usuário';
-        });
+    // Carregar dados do usuário (avatar e email)
+    async function loadUserData() {
+        try {
+            const res = await fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } });
+            if (!res.ok) throw new Error();
+            const user = await res.json();
+            const avatarDiv = document.getElementById('userAvatar');
+            if (user.avatarBase64) {
+                avatarDiv.style.backgroundImage = `url(data:image/jpeg;base64,${user.avatarBase64})`;
+                avatarDiv.style.backgroundSize = 'cover';
+                avatarDiv.textContent = '';
+            } else {
+                avatarDiv.textContent = (user.name ? user.name.charAt(0) : user.email.charAt(0)).toUpperCase();
+                avatarDiv.style.backgroundImage = '';
+            }
+            document.getElementById('userEmailDisplay').textContent = user.name || user.email;
+        } catch {
+            // fallback
+        }
+    }
 
-    // Inicializar tabela
     loadTransactions();
+    loadUserData();
 </script>
 <script th:src="@{/js/transitions.js}"></script>
 </body>

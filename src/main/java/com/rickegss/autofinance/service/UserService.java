@@ -1,6 +1,8 @@
 package com.rickegss.autofinance.service;
 
 
+import com.rickegss.autofinance.dto.PasswordChangeDTO;
+import com.rickegss.autofinance.dto.ProfileUpdateDTO;
 import com.rickegss.autofinance.entity.FinancialGoal;
 import com.rickegss.autofinance.entity.User;
 
@@ -12,4 +14,7 @@ public interface UserService {
     void saveUserCategories(String email, List<String> categories);
     void saveUserDetails(String email, FinancialGoal goal, BigDecimal income);
     User findByEmail(String email);
+    User updateProfile(String email, ProfileUpdateDTO dto);
+    void changePassword(String email, PasswordChangeDTO dto);
+    void updateAvatar(String email, byte[] avatar);
 }

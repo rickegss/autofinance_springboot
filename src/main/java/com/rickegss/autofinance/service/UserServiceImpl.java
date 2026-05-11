@@ -1,5 +1,7 @@
 package com.rickegss.autofinance.service;
 
+import com.rickegss.autofinance.dto.PasswordChangeDTO;
+import com.rickegss.autofinance.dto.ProfileUpdateDTO;
 import com.rickegss.autofinance.entity.FinancialGoal;
 import com.rickegss.autofinance.entity.User;
 import com.rickegss.autofinance.repository.UserRepository;
@@ -54,5 +56,41 @@ public class UserServiceImpl implements UserService{
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+    }
+
+    @Override
+    @Transactional
+    public User updateProfile(String email, ProfileUpdateDTO dto){
+        User user = findByEmail(email);
+        user.setName(dto.name());
+        user.setEmail(dto.email());
+        user.setFinancialGoal(dto.financialGoal());
+        user.setMonthlyIncome(dto.monthlyIncome());
+        return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(String email, PasswordChangeDTO dto){
+        if (!dto.newPassword().equals(dto.confirmNewPassword())) {
+            throw new IllegalArgumentException("As novas senhas não coincidem");
+        }
+        User user = findByEmail(email);
+        if (!passwordEncoder.matches(dto.currentPassword(), user.getPassword())){
+            throw new IllegalArgumentException("Senha atual incorreta");
+        }
+        if (dto.newPassword().equals(user.getPassword())){
+            throw new IllegalArgumentException("A nova senha não pode ser igual a anterior");
+        }
+        user.setPassword(passwordEncoder.encode(dto.newPassword()));
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void updateAvatar(String email, byte[] avatar){
+        User user = findByEmail(email);
+        user.setAvatar(avatar);
+        userRepository.save(user);
     }
 }

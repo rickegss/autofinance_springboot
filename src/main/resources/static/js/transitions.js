@@ -9,7 +9,7 @@ document.querySelectorAll('a[href]:not([href^="#"])').forEach(link => {
     });
 });
 
-document.querySelectorAll('form').forEach(form => {
+document.querySelectorAll('form:not([data-spa])').forEach(form => {
     form.addEventListener('submit', () => {
         document.body.style.opacity = '0';
     });

@@ -2,6 +2,7 @@ package com.rickegss.autofinance.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Type;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -25,6 +26,12 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "avatar", columnDefinition = "bytea")
+    private byte[] avatar;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_categories", joinColumns = @JoinColumn(name = "user_id"))

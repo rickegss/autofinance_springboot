@@ -8,15 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { poppins: ['Poppins', 'sans-serif'] }
-                }
-            }
-        }
-    </script>
     <style>
         body { opacity: 0; transition: opacity 0.3s ease; }
         body.loaded { opacity: 1; }
@@ -30,6 +21,8 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             cursor: default;
             position: absolute;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .bubble:hover {
             transform: scale(1.08);
@@ -70,69 +63,34 @@
 </head>
 <body class="font-poppins bg-[#f0f2f8] min-h-screen flex">
 
-<!-- SIDEBAR (igual ao original, sem alterações) -->
 <aside class="w-[240px] bg-white min-h-screen flex flex-col px-5 py-6 shadow-[2px_0_12px_rgba(0,0,0,0.06)] flex-shrink-0">
     <div class="flex items-center gap-2 mb-10 px-2">
         <h1 class="text-[1.3rem] font-bold text-[#1a1aff]">Autofinance</h1>
-        <svg class="w-6 h-6 text-[#1a1aff]" viewBox="0 0 38 38" fill="none">
-            <polygon points="19,2 35,11 35,27 19,36 3,27 3,11" fill="none" stroke="currentColor" stroke-width="2.5"/>
-            <line x1="19" y1="2" x2="19" y2="36" stroke="currentColor" stroke-width="1.5"/>
-            <line x1="3" y1="11" x2="35" y2="27" stroke="currentColor" stroke-width="1.5"/>
-            <line x1="35" y1="11" x2="3" y2="27" stroke="currentColor" stroke-width="1.5"/>
-        </svg>
+        <svg class="w-6 h-6 text-[#1a1aff]" viewBox="0 0 38 38" fill="none">...</svg>
     </div>
-
     <nav class="flex flex-col gap-1 flex-1">
-        <a href="/dashboard" class="nav-item active">
-            <i data-lucide="home" class="w-4 h-4"></i>
-            <span>Início</span>
-        </a>
-        <a href="/transactions" class="nav-item">
-            <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
-            <span>Lançamentos</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i data-lucide="target" class="w-4 h-4"></i>
-            <span>Metas</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
-            <span>Relatórios</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i data-lucide="calendar" class="w-4 h-4"></i>
-            <span>Planejamento</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i data-lucide="tag" class="w-4 h-4"></i>
-            <span>Categorias</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i data-lucide="calendar-days" class="w-4 h-4"></i>
-            <span>Calendário</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i data-lucide="settings" class="w-4 h-4"></i>
-            <span>Configurações</span>
-        </a>
+        <a href="/dashboard" class="nav-item active"><i data-lucide="home" class="w-4 h-4"></i><span>Início</span></a>
+        <a href="/transactions" class="nav-item"><i data-lucide="arrow-left-right" class="w-4 h-4"></i><span>Lançamentos</span></a>
+        <a href="#" class="nav-item"><i data-lucide="target" class="w-4 h-4"></i><span>Metas</span></a>
+        <a href="#" class="nav-item"><i data-lucide="bar-chart-2" class="w-4 h-4"></i><span>Relatórios</span></a>
+        <a href="#" class="nav-item"><i data-lucide="calendar" class="w-4 h-4"></i><span>Planejamento</span></a>
+        <a href="#" class="nav-item"><i data-lucide="tag" class="w-4 h-4"></i><span>Categorias</span></a>
+        <a href="#" class="nav-item"><i data-lucide="calendar-days" class="w-4 h-4"></i><span>Calendário</span></a>
+        <a href="#" class="nav-item"><i data-lucide="settings" class="w-4 h-4"></i><span>Configurações</span></a>
     </nav>
-
     <div class="mt-auto pt-4 border-t border-[#f0f2f8]">
-        <div class="flex items-center gap-3 px-2 py-3 rounded-xl hover:bg-[#f0f2f8] cursor-pointer transition-colors mb-2">
+        <a href="/profile" class="flex items-center gap-3 px-2 py-3 rounded-xl hover:bg-[#f0f2f8] transition-colors mb-2 no-underline">
             <div class="w-9 h-9 rounded-full bg-[#1a1aff] flex items-center justify-center text-white font-bold text-sm flex-shrink-0" id="user-avatar">U</div>
             <div class="flex flex-col min-w-0">
                 <span class="text-[0.8rem] font-semibold text-[#1a1a2e] truncate" id="user-email-display">usuário</span>
                 <span class="text-[0.72rem] text-[#666]">Ver perfil</span>
             </div>
             <i data-lucide="chevron-right" class="w-4 h-4 text-[#aaa] ml-auto flex-shrink-0"></i>
-        </div>
+        </a>
     </div>
 </aside>
 
-<!-- MAIN CONTENT -->
 <main class="flex-1 p-8 overflow-y-auto">
-
-    <!-- Header -->
     <div class="flex justify-between items-start mb-8">
         <div>
             <h2 class="text-[1.5rem] font-bold text-[#1a1a2e]">Visão geral</h2>
@@ -143,8 +101,6 @@
             <i data-lucide="chevron-down" class="w-4 h-4 text-[#666]"></i>
         </div>
     </div>
-
-    <!-- Cards de resumo -->
     <div class="grid grid-cols-3 gap-5 mb-8">
         <div class="bg-white rounded-2xl p-6 shadow-sm">
             <p class="text-[0.8rem] text-[#666] font-medium mb-1">Renda mensal</p>
@@ -155,24 +111,16 @@
             <p class="text-[0.8rem] text-[#666] font-medium mb-1">Gasto total</p>
             <p class="text-[1.8rem] font-extrabold text-[#ef4444]" id="card-expenses">R$ 0,00</p>
             <p class="text-[0.78rem] text-[#666] mt-3" id="expenses-pct">0% da renda</p>
-            <div class="w-full h-1.5 bg-[#f0f2f8] rounded-full mt-1.5">
-                <div class="h-full bg-[#ef4444] rounded-full transition-all duration-500" id="expenses-bar" style="width:0%"></div>
-            </div>
+            <div class="w-full h-1.5 bg-[#f0f2f8] rounded-full mt-1.5"><div class="h-full bg-[#ef4444] rounded-full transition-all duration-500" id="expenses-bar" style="width:0%"></div></div>
         </div>
         <div class="bg-white rounded-2xl p-6 shadow-sm">
             <p class="text-[0.8rem] text-[#666] font-medium mb-1">Economia</p>
             <p class="text-[1.8rem] font-extrabold text-[#10b981]" id="card-savings">R$ 0,00</p>
             <p class="text-[0.78rem] text-[#666] mt-3" id="savings-pct">0% da renda</p>
-            <div class="w-full h-1.5 bg-[#f0f2f8] rounded-full mt-1.5">
-                <div class="h-full bg-[#10b981] rounded-full transition-all duration-500" id="savings-bar" style="width:0%"></div>
-            </div>
+            <div class="w-full h-1.5 bg-[#f0f2f8] rounded-full mt-1.5"><div class="h-full bg-[#10b981] rounded-full transition-all duration-500" id="savings-bar" style="width:0%"></div></div>
         </div>
     </div>
-
-    <!-- Distribuição + Metas (grid 2 colunas) -->
     <div class="grid grid-cols-2 gap-5">
-
-        <!-- Distribuição dos gastos (bolhas dinâmicas) -->
         <div class="bg-white rounded-2xl p-6 shadow-sm">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-[1rem] font-bold text-[#1a1a2e]">Distribuição dos gastos</h3>
@@ -182,8 +130,6 @@
             <div class="flex gap-4 mt-4 flex-wrap" id="bubble-legend"></div>
             <div id="no-expenses-message" class="text-center text-gray-500 py-8 hidden">Nenhuma despesa neste mês</div>
         </div>
-
-        <!-- Progresso das metas (ainda estático, pode ser removido ou mantido como exemplo) -->
         <div class="bg-white rounded-2xl p-6 shadow-sm">
             <div class="flex justify-between items-center mb-5">
                 <h3 class="text-[1rem] font-bold text-[#1a1a2e]">Progresso das metas</h3>
@@ -191,23 +137,15 @@
             </div>
             <div class="flex flex-col gap-5" id="goals-container"></div>
         </div>
-
     </div>
-
 </main>
 
 <script th:inline="javascript">
     lucide.createIcons();
 
-    // Dados do Thymeleaf (passados pelo DashboardController)
-    const userEmail = /*[[${user.email}]]*/ '';
-    const monthlyIncome = parseFloat(/*[[${user.monthlyIncome}]]*/ 0);
-
-    // CSRF token para as requisições
     const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
-    // Elementos do DOM
     const incomeEl = document.getElementById('card-income');
     const expensesEl = document.getElementById('card-expenses');
     const savingsEl = document.getElementById('card-savings');
@@ -219,48 +157,58 @@
     const legendContainer = document.getElementById('bubble-legend');
     const noExpensesMsg = document.getElementById('no-expenses-message');
     const dateEl = document.getElementById('current-date');
-    const userAvatar = document.getElementById('user-avatar');
-    const userEmailDisplay = document.getElementById('user-email-display');
 
-    // Formatação de moeda
     const formatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
-    // Data atual (para o cabeçalho e para filtrar o mês corrente)
     const today = new Date();
     const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth() + 1; // 1-12
+    const currentMonth = today.getMonth() + 1;
     dateEl.textContent = today.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
     dateEl.textContent = dateEl.textContent.charAt(0).toUpperCase() + dateEl.textContent.slice(1);
 
-    // Exibir dados do usuário (email e avatar)
-    userAvatar.textContent = userEmail.charAt(0).toUpperCase();
-    userEmailDisplay.textContent = userEmail;
+    // Dados básicos que virão da API (não mais do Thymeleaf estático)
+    let userEmail = '';
+    let monthlyIncome = 0;
 
-    // Atualizar card de renda mensal (vindo do Thymeleaf)
-    incomeEl.textContent = formatter.format(monthlyIncome);
-
-    // Função para buscar transações e atualizar o dashboard
     async function loadDashboardData() {
         try {
-            const response = await fetch('/api/transactions', {
-                headers: { [csrfHeader]: csrfToken }
-            });
-            if (!response.ok) throw new Error('Erro ao carregar transações');
-            const transactions = await response.json();
+            // Primeiro, busca dados do usuário
+            const userRes = await fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } });
+            if (userRes.ok) {
+                const user = await userRes.json();
+                userEmail = user.email;
+                monthlyIncome = parseFloat(user.monthlyIncome) || 0;
+                // Atualiza avatar e nome no sidebar
+                const avatarDiv = document.getElementById('user-avatar');
+                if (user.avatarBase64) {
+                    avatarDiv.style.backgroundImage = `url(data:image/jpeg;base64,${user.avatarBase64})`;
+                    avatarDiv.style.backgroundSize = 'cover';
+                    avatarDiv.textContent = '';
+                } else {
+                    avatarDiv.textContent = (user.name ? user.name.charAt(0) : user.email.charAt(0)).toUpperCase();
+                    avatarDiv.style.backgroundImage = '';
+                }
+                const displaySpan = document.getElementById('user-email-display');
+                displaySpan.textContent = user.name || user.email;
+            }
+            // Atualiza card de renda
+            incomeEl.textContent = formatter.format(monthlyIncome);
 
-            // Filtrar transações do mês atual
+            // Busca transações
+            const txRes = await fetch('/api/transactions', { headers: { [csrfHeader]: csrfToken } });
+            if (!txRes.ok) throw new Error('Erro ao carregar transações');
+            const transactions = await txRes.json();
+
             const startDate = new Date(currentYear, currentMonth - 1, 1);
-            const endDate = new Date(currentYear, currentMonth, 0); // último dia do mês
+            const endDate = new Date(currentYear, currentMonth, 0);
             const monthTransactions = transactions.filter(t => {
                 const txDate = new Date(t.date);
                 return txDate >= startDate && txDate <= endDate;
             });
 
-            // Calcular totais por tipo e por categoria (apenas despesas)
             let totalExpenses = 0;
             let totalIncome = 0;
-            const categoryMap = new Map(); // category -> amount
-
+            const categoryMap = new Map();
             for (const tx of monthTransactions) {
                 const amount = parseFloat(tx.amount);
                 if (tx.type === 'DESPESA') {
@@ -272,27 +220,20 @@
                 }
             }
 
-            // Economia = receitas do mês - despesas do mês (se quiser usar apenas renda cadastrada, use monthlyIncome)
-            // Neste dashboard, usamos a renda mensal cadastrada (monthlyIncome) para calcular % gasto/economia.
-            // A economia real sugere usar totalIncome, mas muitos sistemas comparam com a renda planejada.
-            // Vamos seguir o modelo original (compara com monthlyIncome) para consistência.
             const savings = monthlyIncome - totalExpenses;
             const expensesPercent = monthlyIncome > 0 ? (totalExpenses / monthlyIncome) * 100 : 0;
             const savingsPercent = monthlyIncome > 0 ? (savings / monthlyIncome) * 100 : 0;
 
-            // Atualizar cards
             expensesEl.textContent = formatter.format(totalExpenses);
             savingsEl.textContent = formatter.format(savings);
             expensesPctEl.textContent = `${expensesPercent.toFixed(0)}% da renda`;
             savingsPctEl.textContent = `${savingsPercent.toFixed(0)}% da renda`;
 
-            // Animar barras
             setTimeout(() => {
                 expensesBar.style.width = `${expensesPercent}%`;
                 savingsBar.style.width = `${savingsPercent}%`;
             }, 300);
 
-            // Gerar distribuição de gastos (bolhas)
             if (categoryMap.size === 0) {
                 bubbleContainer.classList.add('hidden');
                 noExpensesMsg.classList.remove('hidden');
@@ -302,63 +243,35 @@
             bubbleContainer.classList.remove('hidden');
             noExpensesMsg.classList.add('hidden');
 
-            // Ordenar categorias por valor (decrescente) e pegar até 7 para não poluir
-            const sortedCategories = Array.from(categoryMap.entries())
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 7);
+            const sortedCategories = Array.from(categoryMap.entries()).sort((a,b) => b[1]-a[1]).slice(0,7);
             const maxValue = sortedCategories[0][1];
-
-            // Limpar containers
             bubbleContainer.innerHTML = '';
             legendContainer.innerHTML = '';
-
-            // Cores pré-definidas (paleta amigável)
             const colorPalette = ['#5b21b6', '#10b981', '#f59e0b', '#3b82f6', '#ec4899', '#14b8a6', '#ef4444'];
 
             sortedCategories.forEach(([category, amount], idx) => {
                 const ratio = amount / maxValue;
-                const minSize = 70;
-                const maxSize = 160;
-                const size = minSize + ratio * (maxSize - minSize);
+                const size = 70 + ratio * 90;
                 const color = colorPalette[idx % colorPalette.length];
-
-                // Posição pseudo-aleatória mas consistente dentro do container
                 const angle = (idx * 50) % 360;
-                const radius = 80 + (idx * 15);
+                const radius = 80 + idx * 15;
                 const x = 50 + (Math.cos(angle * Math.PI / 180) * radius) / 2;
                 const y = 50 + (Math.sin(angle * Math.PI / 180) * radius) / 3;
-
                 const bubble = document.createElement('div');
                 bubble.className = 'bubble';
-                bubble.style.cssText = `
-                    width: ${size}px;
-                    height: ${size}px;
-                    background-color: ${color};
-                    left: calc(${x}% - ${size/2}px);
-                    top: calc(${y}% - ${size/2}px);
-                    opacity: 0.88;
-                `;
-                bubble.innerHTML = `
-                    <span style="color:white; font-size:${size > 100 ? '0.8rem' : '0.68rem'}; font-weight:700; text-align:center; padding:4px; line-height:1.2;">${category}</span>
-                    <span style="color:rgba(255,255,255,0.9); font-size:${size > 100 ? '0.72rem' : '0.62rem'}; font-weight:600;">${formatter.format(amount)}</span>
-                `;
+                bubble.style.cssText = `width:${size}px; height:${size}px; background-color:${color}; left:calc(${x}% - ${size/2}px); top:calc(${y}% - ${size/2}px); opacity:0.88;`;
+                bubble.innerHTML = `<span style="color:white; font-size:${size>100?'0.8rem':'0.68rem'}; font-weight:700;">${category}</span><span style="color:rgba(255,255,255,0.9); font-size:${size>100?'0.72rem':'0.62rem'};">${formatter.format(amount)}</span>`;
                 bubbleContainer.appendChild(bubble);
-
-                // Legenda
-                const pct = (amount / totalExpenses) * 100;
+                const pct = (amount/totalExpenses)*100;
                 const legendItem = document.createElement('div');
                 legendItem.className = 'flex items-center gap-1.5';
-                legendItem.innerHTML = `
-                    <span style="width:10px;height:10px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0;"></span>
-                    <span style="font-size:0.72rem;color:#666;">${category} (${pct.toFixed(0)}%)</span>
-                `;
+                legendItem.innerHTML = `<span style="width:10px;height:10px;border-radius:50%;background:${color};"></span><span style="font-size:0.72rem;color:#666;">${category} (${pct.toFixed(0)}%)</span>`;
                 legendContainer.appendChild(legendItem);
             });
 
-            // Opcional: metas (ainda estático, mas pode ser integrado futuramente)
+            // Metas estáticas (exemplo)
             const goalsContainer = document.getElementById('goals-container');
             if (goalsContainer) {
-                // Exemplo mantido – pode ser substituído por dados reais depois
                 const goals = [
                     { name: 'Reserva de emergência', current: 3200, target: 10000, icon: 'shield' },
                     { name: 'Viagem dos sonhos', current: 1800, target: 5000, icon: 'plane' },
@@ -369,18 +282,11 @@
                     const pct = Math.round((goal.current / goal.target) * 100);
                     goalsHtml += `
                         <div class="flex items-center gap-3 mb-2">
-                            <div class="w-8 h-8 rounded-full bg-[#f0f2f8] flex items-center justify-center flex-shrink-0">
-                                <i data-lucide="${goal.icon}" class="w-4 h-4" style="stroke:#1a1aff;"></i>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="text-[0.85rem] font-semibold text-[#1a1a2e]">${goal.name}</span>
-                                    <span class="text-[0.8rem] font-bold text-[#1a1aff]">${pct}%</span>
-                                </div>
-                                <div class="text-[0.72rem] text-[#666] mb-1.5">${formatter.format(goal.current)} / ${formatter.format(goal.target)}</div>
-                                <div class="w-full h-2 bg-[#f0f2f8] rounded-full overflow-hidden">
-                                    <div class="h-full bg-[#1a1aff] rounded-full transition-all duration-700" style="width:${pct}%"></div>
-                                </div>
+                            <div class="w-8 h-8 rounded-full bg-[#f0f2f8] flex items-center justify-center"><i data-lucide="${goal.icon}" class="w-4 h-4" style="stroke:#1a1aff;"></i></div>
+                            <div class="flex-1">
+                                <div class="flex justify-between"><span class="text-[0.85rem] font-semibold">${goal.name}</span><span class="text-[0.8rem] font-bold text-[#1a1aff]">${pct}%</span></div>
+                                <div class="text-[0.72rem] text-[#666] mb-1">${formatter.format(goal.current)} / ${formatter.format(goal.target)}</div>
+                                <div class="w-full h-2 bg-[#f0f2f8] rounded-full"><div class="h-full bg-[#1a1aff] rounded-full transition-all duration-700" style="width:${pct}%"></div></div>
                             </div>
                         </div>
                     `;
@@ -388,16 +294,13 @@
                 goalsContainer.innerHTML = goalsHtml;
                 lucide.createIcons();
             }
-
         } catch (error) {
-            console.error('Erro ao carregar dados do dashboard:', error);
-            // Mostrar mensagem de erro amigável
+            console.error('Erro ao carregar dashboard:', error);
             expensesEl.textContent = 'Erro ao carregar';
             savingsEl.textContent = 'Erro ao carregar';
         }
     }
 
-    // Chamar a função ao carregar a página
     loadDashboardData();
 </script>
 <script th:src="@{/js/transitions.js}"></script>
