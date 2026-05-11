@@ -21,7 +21,12 @@ public class RecurringTransactionService {
 
     @Transactional
     public void generateRecurringTransactions() {
-        LocalDate today = LocalDate.now();
+        generateRecurringTransactions(LocalDate.now());
+    }
+
+
+    @Transactional
+    public void generateRecurringTransactions(LocalDate today) {
         YearMonth currentMonth = YearMonth.from(today);
         int currentDay = today.getDayOfMonth();
 
@@ -33,18 +38,18 @@ public class RecurringTransactionService {
             if (recurringDay == null) continue;
 
             LocalDate targetDate;
-
-            if (recurringDay < currentDay) {
-                targetDate = today.plusMonths(1).withDayOfMonth(recurringDay);
-            } else {
-                targetDate = today.withDayOfMonth(recurringDay);
-            }
-
             try {
-                targetDate = LocalDate.of(targetDate.getYear(), targetDate.getMonth(), targetDate.getDayOfMonth());
+                if (recurringDay < currentDay) {
+                    targetDate = today.plusMonths(1).withDayOfMonth(recurringDay);
+                } else {
+                    targetDate = today.withDayOfMonth(recurringDay);
+                }
             } catch (DateTimeException e) {
-                targetDate = YearMonth.from(targetDate).atEndOfMonth();
-                log.debug("Dia {} inválido para o mês {}, ajustado para último dia do mês: {}", recurringDay, targetDate.getMonth(), targetDate);
+                if (recurringDay < currentDay) {
+                    targetDate = YearMonth.from(today.plusMonths(1)).atEndOfMonth();
+                } else {
+                    targetDate = YearMonth.from(today).atEndOfMonth();
+                }
             }
 
             boolean alreadyExists = transactionRepository.existsByUserAndDateAndAmountAndTypeAndCategory(

@@ -43,9 +43,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgument(
             IllegalArgumentException ex) {
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null)
+        log.warn("Erro de negócio: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), null)
         );
     }
 

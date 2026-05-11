@@ -22,10 +22,6 @@ public class UserProfileController {
 
     private final UserService userService;
 
-    public record UserDto(Long id, String name, String email,
-                          FinancialGoal financialGoal, BigDecimal monthlyIncome,
-                          String avatarBase64) {}
-
     @GetMapping("/me")
     public ResponseEntity<UserDto> getCurrentUser(Principal principal) {
         User user = userService.findByEmail(principal.getName());
@@ -64,4 +60,8 @@ public class UserProfileController {
                 avatarBase64
         );
     }
+
+    public record UserDto(Long id, String name, String email,
+                          FinancialGoal financialGoal, BigDecimal monthlyIncome,
+                          String avatarBase64) {}
 }
