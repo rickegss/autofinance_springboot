@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { fontFamily: { poppins: ['Poppins', 'sans-serif'] } }
+            }
+        }
+    </script>
+    <style>
+        body { opacity: 0; transition: opacity 0.3s ease; }
+        body.loaded { opacity: 1; }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #64748b;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        .nav-item:hover {
+            background-color: #f0f2f8;
+            color: #1a1aff;
+        }
+        .nav-item.active {
+            background-color: #1a1aff;
+            color: white;
+        }
+        .nav-item.active svg { stroke: white; }
+    </style>
+    <title>Autofinance - Metas</title>
+</head>
+<body class="font-poppins bg-[#f0f2f8] min-h-screen flex">
+
+<aside class="w-[240px] bg-white min-h-screen flex flex-col px-5 py-6 shadow-[2px_0_12px_rgba(0,0,0,0.06)] flex-shrink-0">
+    <div class="flex items-center gap-2 mb-10 px-2">
+        <h1 class="text-[1.3rem] font-bold text-[#1a1aff]">Autofinance</h1>
+        <svg class="w-6 h-6 text-[#1a1aff]" viewBox="0 0 38 38" fill="none">...</svg>
+    </div>
+    <nav class="flex flex-col gap-1 flex-1">
+        <a href="/dashboard" class="nav-item"><i data-lucide="home" class="w-4 h-4"></i><span>Início</span></a>
+        <a href="/transactions" class="nav-item"><i data-lucide="arrow-left-right" class="w-4 h-4"></i><span>Lançamentos</span></a>
+        <a href="/goals" class="nav-item active"><i data-lucide="target" class="w-4 h-4"></i><span>Metas</span></a>
+        <a href="#" class="nav-item"><i data-lucide="bar-chart-2" class="w-4 h-4"></i><span>Relatórios</span></a>
+        <a href="#" class="nav-item"><i data-lucide="calendar" class="w-4 h-4"></i><span>Planejamento</span></a>
+        <a href="#" class="nav-item"><i data-lucide="tag" class="w-4 h-4"></i><span>Categorias</span></a>
+        <a href="#" class="nav-item"><i data-lucide="calendar-days" class="w-4 h-4"></i><span>Calendário</span></a>
+        <a href="#" class="nav-item"><i data-lucide="settings" class="w-4 h-4"></i><span>Configurações</span></a>
+    </nav>
+    <div class="mt-auto pt-4 border-t border-[#f0f2f8]">
+        <a href="/profile" class="flex items-center gap-3 px-2 py-3 rounded-xl hover:bg-[#f0f2f8] transition-colors mb-2 no-underline">
+            <div class="w-9 h-9 rounded-full bg-[#1a1aff] flex items-center justify-center text-white font-bold text-sm flex-shrink-0" id="userAvatar">U</div>
+            <div class="flex flex-col min-w-0">
+                <span class="text-[0.8rem] font-semibold text-[#1a1a2e] truncate" id="userName">Carregando...</span>
+                <span class="text-[0.72rem] text-[#666]">Ver perfil</span>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-[#aaa] ml-auto flex-shrink-0"></i>
+        </a>
+    </div>
+</aside>
+
+<main class="flex-1 p-8 overflow-y-auto">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h2 class="text-[1.5rem] font-bold text-[#1a1a2e]">Minhas Metas</h2>
+            <p class="text-[0.85rem] text-[#666] mt-1">Acompanhe seu progresso financeiro</p>
+        </div>
+        <button id="newGoalBtn" class="bg-[#1a1aff] text-white px-5 py-2 rounded-xl flex items-center gap-2 hover:bg-[#0f0fcc] transition">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Nova meta</span>
+        </button>
+    </div>
+
+    <div id="messageDiv" class="hidden mb-4 p-3 rounded-lg text-sm"></div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="goalsContainer">
+        <div class="col-span-full text-center text-gray-500 py-12">Carregando metas...</div>
+    </div>
+</main>
+
+<!-- Modal para criar nova meta -->
+<div id="goalModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 relative">
+        <button id="closeModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+            <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+        <h3 class="text-xl font-bold text-[#1a1a2e] mb-4">Nova Meta</h3>
+        <form id="goalForm" data-spa>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nome da meta *</label>
+                <input type="text" id="goalName" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Valor alvo (R$) *</label>
+                <input type="number" id="targetAmount" step="0.01" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Valor atual (R$)</label>
+                <input type="number" id="currentAmount" step="0.01" class="w-full border border-gray-300 rounded-lg px-4 py-2" placeholder="0,00">
+                <p class="text-xs text-gray-500 mt-1">Se não informado, iniciará em R$ 0,00</p>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" id="cancelModalBtn" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-[#1a1aff] text-white rounded-lg hover:bg-[#0f0fcc]">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para adicionar progresso -->
+<div id="progressModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 relative">
+        <button id="closeProgressModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+            <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+        <h3 id="progressModalTitle" class="text-xl font-bold text-[#1a1a2e] mb-2">Adicionar Progresso</h3>
+        <p id="progressGoalInfo" class="text-sm text-gray-600 mb-4"></p>
+        <form id="progressForm" data-spa>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Valor a adicionar (R$)</label>
+                <input type="number" id="progressAmount" step="0.01" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" id="cancelProgressBtn" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-[#1a1aff] text-white rounded-lg hover:bg-[#0f0fcc]">Adicionar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    lucide.createIcons();
+
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+    const goalsContainer = document.getElementById('goalsContainer');
+    const messageDiv = document.getElementById('messageDiv');
+    const createModal = document.getElementById('goalModal');
+    const progressModal = document.getElementById('progressModal');
+    const createForm = document.getElementById('goalForm');
+    const progressForm = document.getElementById('progressForm');
+    let currentGoalId = null;
+    let currentGoalName = null;
+    let currentGoalCurrent = 0;
+    let currentGoalTarget = 0;
+
+    const formatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    function showMessage(text, type) {
+        messageDiv.textContent = text;
+        messageDiv.className = `mb-4 p-3 rounded-lg text-sm ${type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+        messageDiv.classList.remove('hidden');
+        setTimeout(() => messageDiv.classList.add('hidden'), 4000);
+    }
+
+    async function loadGoals() {
+        try {
+            const response = await fetch('/api/goals', { headers: { [csrfHeader]: csrfToken } });
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status} - ${errorText.substring(0, 100)}`);
+            }
+            const goals = await response.json();
+            if (!goals.length) {
+                goalsContainer.innerHTML = '<div class="col-span-full text-center text-gray-500 py-12">Nenhuma meta cadastrada. Clique em "Nova meta" para começar.</div>';
+                return;
+            }
+            let html = '';
+            goals.forEach(goal => {
+                const percent = (goal.currentAmount / goal.targetAmount) * 100;
+                const percentFormatted = percent.toFixed(0);
+                html += `
+                    <div class="bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="text-lg font-bold text-[#1a3a7a]">${escapeHtml(goal.name)}</h3>
+                            <div class="flex gap-2">
+                                <button class="add-progress-btn text-blue-600 hover:text-blue-800" data-id="${goal.id}" data-name="${escapeHtml(goal.name)}" data-current="${goal.currentAmount}" data-target="${goal.targetAmount}">
+                                    <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                                </button>
+                                <button class="delete-goal-btn text-red-600 hover:text-red-800" data-id="${goal.id}">
+                                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                <span>Progresso</span>
+                                <span>${percentFormatted}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-[#1a1aff] rounded-full h-2.5 transition-all duration-500" style="width: ${percent}%"></div>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500">${formatter.format(goal.currentAmount)} / ${formatter.format(goal.targetAmount)}</p>
+                    </div>
+                `;
+            });
+            goalsContainer.innerHTML = html;
+            lucide.createIcons();
+            attachEvents();
+        } catch (err) {
+            console.error('loadGoals error:', err);
+            goalsContainer.innerHTML = `<div class="col-span-full text-center text-red-500 py-12">Erro ao carregar metas: ${err.message}</div>`;
+            showMessage('Erro ao carregar metas. Verifique o console.', 'error');
+        }
+    }
+
+    function attachEvents() {
+        document.querySelectorAll('.add-progress-btn').forEach(btn => {
+            btn.removeEventListener('click', addProgressClickHandler);
+            btn.addEventListener('click', addProgressClickHandler);
+        });
+        document.querySelectorAll('.delete-goal-btn').forEach(btn => {
+            btn.removeEventListener('click', deleteGoalHandler);
+            btn.addEventListener('click', deleteGoalHandler);
+        });
+    }
+
+    function addProgressClickHandler(e) {
+        const btn = e.currentTarget;
+        currentGoalId = btn.getAttribute('data-id');
+        currentGoalName = btn.getAttribute('data-name');
+        currentGoalCurrent = parseFloat(btn.getAttribute('data-current'));
+        currentGoalTarget = parseFloat(btn.getAttribute('data-target'));
+        document.getElementById('progressModalTitle').innerText = 'Adicionar Progresso';
+        document.getElementById('progressGoalInfo').innerHTML = `Meta: <strong>${escapeHtml(currentGoalName)}</strong><br>Atual: ${formatter.format(currentGoalCurrent)} | Alvo: ${formatter.format(currentGoalTarget)}`;
+        document.getElementById('progressAmount').value = '';
+        progressModal.classList.remove('hidden');
+    }
+
+    async function addProgress(amount) {
+        try {
+            const res = await fetch(`/api/goals/${currentGoalId}/progress?amount=${amount}`, {
+                method: 'PATCH',
+                headers: { [csrfHeader]: csrfToken }
+            });
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(errorText || 'Erro ao adicionar progresso');
+            }
+            showMessage(`Adicionado ${formatter.format(amount)} à meta "${currentGoalName}"`, 'success');
+            loadGoals();
+        } catch (err) {
+            showMessage(err.message, 'error');
+        } finally {
+            progressModal.classList.add('hidden');
+        }
+    }
+
+    async function deleteGoalHandler(e) {
+        const id = e.currentTarget.getAttribute('data-id');
+        if (!confirm('Tem certeza que deseja excluir esta meta?')) return;
+        try {
+            const res = await fetch(`/api/goals/${id}`, {
+                method: 'DELETE',
+                headers: { [csrfHeader]: csrfToken }
+            });
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(errorText || 'Erro ao excluir meta');
+            }
+            showMessage('Meta excluída com sucesso', 'success');
+            loadGoals();
+        } catch (err) {
+            showMessage(err.message, 'error');
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    document.getElementById('newGoalBtn').onclick = () => {
+        createForm.reset();
+        document.getElementById('currentAmount').value = '';
+        createModal.classList.remove('hidden');
+    };
+    document.getElementById('closeModalBtn').onclick = () => createModal.classList.add('hidden');
+    document.getElementById('cancelModalBtn').onclick = () => createModal.classList.add('hidden');
+
+    createForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('goalName').value.trim();
+        const targetAmount = parseFloat(document.getElementById('targetAmount').value);
+        let currentAmount = document.getElementById('currentAmount').value;
+        if (currentAmount === null || currentAmount === '') currentAmount = 0;
+        currentAmount = parseFloat(currentAmount) || 0;
+
+        if (!name || isNaN(targetAmount) || targetAmount <= 0 || isNaN(currentAmount) || currentAmount < 0) {
+            showMessage('Preencha nome e valor alvo corretamente (valor atual opcional, não negativo).', 'error');
+            return;
+        }
+
+        const payload = { name, targetAmount, currentAmount };
+
+        try {
+            const response = await fetch('/api/goals', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                const errorBody = await response.text();
+                throw new Error(`Erro ${response.status}: ${errorBody.substring(0, 200)}`);
+            }
+            showMessage('Meta criada com sucesso!', 'success');
+            createModal.classList.add('hidden');
+            await loadGoals();
+        } catch (err) {
+            console.error('Erro ao criar meta:', err);
+            showMessage(`Erro: ${err.message}`, 'error');
+        }
+    };
+
+    progressForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const amount = parseFloat(document.getElementById('progressAmount').value);
+        if (isNaN(amount) || amount <= 0) {
+            showMessage('Digite um valor válido maior que zero', 'error');
+            return;
+        }
+        await addProgress(amount);
+        progressModal.classList.add('hidden');
+    };
+
+    document.getElementById('closeProgressModalBtn').onclick = () => progressModal.classList.add('hidden');
+    document.getElementById('cancelProgressBtn').onclick = () => progressModal.classList.add('hidden');
+
+    async function loadUserData() {
+        try {
+            const res = await fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } });
+            if (res.ok) {
+                const user = await res.json();
+                document.getElementById('userAvatar').textContent = (user.name ? user.name.charAt(0) : user.email.charAt(0)).toUpperCase();
+                document.getElementById('userName').textContent = user.name || user.email;
+            }
+        } catch (e) { console.warn(e); }
+    }
+
+    loadUserData();
+    loadGoals();
+</script>
+<script th:src="@{/js/transitions.js}"></script>
+</body>
+</html>
