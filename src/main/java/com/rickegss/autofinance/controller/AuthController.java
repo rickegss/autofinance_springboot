@@ -40,6 +40,7 @@ public class AuthController {
                     .email(userDTO.getEmail())
                     .password(userDTO.getPassword())
                     .theme("light")
+                    .financialMonthDay(1)
                     .build();
             userService.register(user);
         } catch(IllegalArgumentException e){

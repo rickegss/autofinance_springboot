@@ -57,4 +57,7 @@ public class User {
     @Column(nullable = false)
     private String theme = "light";
 
+    @Column(name = "financial_month_day")
+    private Integer financialMonthDay = 1;
+
 }

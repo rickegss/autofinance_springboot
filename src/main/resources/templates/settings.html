@@ -81,7 +81,7 @@
             <i data-lucide="target" class="w-4 h-4"></i>
             <span>Metas</span>
         </a>
-        <a href="#" class="nav-item">
+        <a href="/reports" class="nav-item">
             <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
             <span>Relatórios</span>
         </a>
@@ -131,6 +131,19 @@
         </div>
 
         <!-- Outras configurações futuras podem ser adicionadas aqui -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 mb-8">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Ciclo financeiro</h3>
+            <div class="flex flex-col gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dia de fechamento do mês</label>
+                    <select id="financialMonthDaySelect" class="w-32 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        <!-- options 1..28 geradas via JS -->
+                    </select>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">O dashboard agrupará receitas/despesas do dia <strong>X</strong> ao dia <strong>X-1</strong> do mês seguinte.</p>
+                </div>
+                <button id="saveFinancialDayBtn" class="bg-[#1a1aff] dark:bg-blue-600 text-white px-4 py-2 rounded-lg w-36 hover:bg-[#0f0fcc] transition">Salvar</button>
+            </div>
+        </div>
     </div>
 </main>
 
@@ -165,6 +178,38 @@
     }
 
     loadUserData();
+    const daySelect = document.getElementById('financialMonthDaySelect');
+    for (let i = 1; i <= 28; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = i;
+        daySelect.appendChild(opt);
+    }
+
+    async function loadFinancialDay() {
+        const res = await fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } });
+        if (res.ok) {
+            const user = await res.json();
+            if (user.financialMonthDay) {
+                daySelect.value = user.financialMonthDay;
+            }
+        }
+    }
+    document.getElementById('saveFinancialDayBtn').addEventListener('click', async () => {
+        const newDay = daySelect.value;
+        const res = await fetch(`/api/user/financial-month-day?day=${newDay}`, {
+            method: 'PUT',
+            headers: { [csrfHeader]: csrfToken }
+        });
+        if (res.ok) {
+            showMessage('Dia do ciclo atualizado! O dashboard será recarregado.', 'success');
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            showMessage('Erro ao salvar', 'error');
+        }
+    });
+
+    loadFinancialDay();
 </script>
 </body>
 </html>

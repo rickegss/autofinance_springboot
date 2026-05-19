@@ -18,4 +18,5 @@ public interface UserService {
     void changePassword(String email, PasswordChangeDTO dto);
     void updateAvatar(String email, byte[] avatar);
     void updateTheme(String email, String theme);
+    void updateFinancialMonthDay(String email, Integer day);
 }
