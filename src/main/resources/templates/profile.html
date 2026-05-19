@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: { fontFamily: { poppins: ['Poppins', 'sans-serif'] } }
             }
@@ -41,16 +42,29 @@
             background-color: #1a1aff;
             color: white;
         }
+        /* Dark mode overrides */
+        .dark .nav-item:hover {
+            background-color: #334155;
+            color: #60a5fa;
+        }
+        .dark .nav-item.active {
+            background-color: #2563eb;
+        }
         img { max-width: 100%; }
+        /* Cropper ajustes para dark mode */
+        .dark .cropper-view-box,
+        .dark .cropper-face {
+            background-color: rgba(0,0,0,0.7);
+        }
     </style>
     <title>Autofinance - Meu Perfil</title>
 </head>
-<body class="font-poppins bg-[#f0f2f8] min-h-screen flex">
+<body class="font-poppins bg-[#f0f2f8] dark:bg-gray-900 min-h-screen flex">
 
-<aside class="w-[240px] bg-white min-h-screen flex flex-col px-5 py-6 shadow-[2px_0_12px_rgba(0,0,0,0.06)] flex-shrink-0">
+<aside class="w-[240px] bg-white dark:bg-gray-800 min-h-screen flex flex-col px-5 py-6 shadow-[2px_0_12px_rgba(0,0,0,0.06)] dark:shadow-none flex-shrink-0">
     <div class="flex items-center gap-2 mb-10 px-2">
-        <h1 class="text-[1.3rem] font-bold text-[#1a1aff]">Autofinance</h1>
-        <svg class="w-6 h-6 text-[#1a1aff]" viewBox="0 0 38 38" fill="none">
+        <h1 class="text-[1.3rem] font-bold text-[#1a1aff] dark:text-blue-400">Autofinance</h1>
+        <svg class="w-6 h-6 text-[#1a1aff] dark:text-blue-400" viewBox="0 0 38 38" fill="none">
             <polygon points="19,2 35,11 35,27 19,36 3,27 3,11" fill="none" stroke="currentColor" stroke-width="2.5"/>
             <line x1="19" y1="2" x2="19" y2="36" stroke="currentColor" stroke-width="1.5"/>
             <line x1="3" y1="11" x2="35" y2="27" stroke="currentColor" stroke-width="1.5"/>
@@ -60,103 +74,105 @@
     <nav class="flex flex-col gap-1 flex-1">
         <a href="/dashboard" class="nav-item"><i data-lucide="home" class="w-4 h-4"></i><span>Painel</span></a>
         <a href="/transactions" class="nav-item"><i data-lucide="arrow-left-right" class="w-4 h-4"></i><span>Lançamentos</span></a>
-        <a href="#" class="nav-item"><i data-lucide="target" class="w-4 h-4"></i><span>Metas</span></a>
+        <a href="/goals" class="nav-item"><i data-lucide="target" class="w-4 h-4"></i><span>Metas</span></a>
         <a href="#" class="nav-item"><i data-lucide="bar-chart-2" class="w-4 h-4"></i><span>Relatórios</span></a>
         <a href="/profile" class="nav-item active"><i data-lucide="user" class="w-4 h-4"></i><span>Perfil</span></a>
     </nav>
-    <div class="mt-auto pt-4 border-t border-[#f0f2f8]">
-        <div class="flex items-center gap-3 px-2 py-3 rounded-xl hover:bg-[#f0f2f8] cursor-pointer transition-colors mb-2">
-            <div class="w-9 h-9 rounded-full bg-[#1a1aff] flex items-center justify-center text-white font-bold text-sm flex-shrink-0" id="userAvatar">U</div>
+    <div class="mt-auto pt-4 border-t border-[#f0f2f8] dark:border-gray-700">
+        <div class="flex items-center gap-3 px-2 py-3 rounded-xl hover:bg-[#f0f2f8] dark:hover:bg-gray-700 cursor-pointer transition-colors mb-2">
+            <div class="w-9 h-9 rounded-full bg-[#1a1aff] dark:bg-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0" id="userAvatar">U</div>
             <div class="flex flex-col min-w-0">
-                <span class="text-[0.8rem] font-semibold text-[#1a1a2e] truncate" id="userName">Carregando...</span>
-                <span class="text-[0.72rem] text-[#666]">Ver perfil</span>
+                <span class="text-[0.8rem] font-semibold text-[#1a1a2e] dark:text-gray-200 truncate" id="userName">Carregando...</span>
+                <span class="text-[0.72rem] text-[#666] dark:text-gray-400">Ver perfil</span>
             </div>
         </div>
     </div>
 </aside>
 
 <main class="flex-1 p-8 overflow-y-auto max-w-4xl mx-auto">
-    <h2 class="text-2xl font-bold text-[#1a1a2e] mb-6">Meu Perfil</h2>
+    <h2 class="text-2xl font-bold text-[#1a1a2e] dark:text-white mb-6">Meu Perfil</h2>
 
     <div id="messageDiv" class="hidden mb-4 p-3 rounded-lg text-sm"></div>
 
-    <!-- ========= AVATAR (AGORA NO TOPO) ========= -->
-    <div class="bg-white rounded-2xl shadow-sm p-6 mb-8">
-        <h3 class="text-lg font-semibold mb-4">Avatar</h3>
+    <!-- ========= AVATAR ========= -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Avatar</h3>
         <div class="flex flex-col md:flex-row gap-8">
             <div class="flex flex-col items-center">
-                <div class="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden shadow-md" id="currentAvatarPreview">
-                    <span class="text-gray-500 text-3xl" id="currentAvatarInitial">U</span>
+                <div class="w-32 h-32 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden shadow-md" id="currentAvatarPreview">
+                    <span class="text-gray-500 dark:text-gray-400 text-3xl" id="currentAvatarInitial">U</span>
                 </div>
-                <p class="text-xs text-gray-500 mt-2">Avatar atual</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Avatar atual</p>
             </div>
             <div class="flex-1">
-                <input type="file" id="avatarFile" accept="image/*" class="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                <input type="file" id="avatarFile" accept="image/*" class="block text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-gray-700 file:text-blue-700 dark:file:text-blue-400 hover:file:bg-blue-100 dark:hover:file:bg-gray-600">
                 <div class="mt-4">
-                    <div class="bg-gray-100 rounded-lg p-2" style="max-width: 400px;">
+                    <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-2" style="max-width: 400px;">
                         <img id="cropperImage" src="" alt="Imagem para cortar" style="display: none; max-width: 100%;">
                     </div>
                     <div class="flex gap-2 mt-3" id="cropperControls" style="display: none;">
-                        <button type="button" id="rotateLeftBtn" class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-sm">↺ Girar</button>
-                        <button type="button" id="zoomOutBtn" class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-sm">- Zoom</button>
-                        <button type="button" id="zoomInBtn" class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-sm">+ Zoom</button>
-                        <button type="button" id="cropAndUploadBtn" class="bg-[#1a1aff] text-white px-4 py-1 rounded text-sm hover:bg-[#0f0fcc] transition">Recortar e enviar</button>
+                        <button type="button" id="rotateLeftBtn" class="bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 px-3 py-1 rounded text-sm dark:text-white">↺ Girar</button>
+                        <button type="button" id="zoomOutBtn" class="bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 px-3 py-1 rounded text-sm dark:text-white">- Zoom</button>
+                        <button type="button" id="zoomInBtn" class="bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 px-3 py-1 rounded text-sm dark:text-white">+ Zoom</button>
+                        <button type="button" id="cropAndUploadBtn" class="bg-[#1a1aff] dark:bg-blue-600 text-white px-4 py-1 rounded text-sm hover:bg-[#0f0fcc] dark:hover:bg-blue-700 transition">Recortar e enviar</button>
                     </div>
                 </div>
-                <p class="text-xs text-gray-500 mt-3">Selecione uma imagem, ajuste o recorte e clique em "Recortar e enviar".</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">Selecione uma imagem, ajuste o recorte e clique em "Recortar e enviar".</p>
             </div>
         </div>
     </div>
 
     <!-- Dados Pessoais -->
-    <div class="bg-white rounded-2xl shadow-sm p-6 mb-8">
-        <h3 class="text-lg font-semibold mb-4">Dados pessoais</h3>
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Dados pessoais</h3>
         <form id="profileForm" data-spa>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Nome</label>
-                <input type="text" id="nameInput" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome</label>
+                <input type="text" id="nameInput" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500">
             </div>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">E-mail</label>
-                <input type="email" id="emailInput" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">E-mail</label>
+                <input type="email" id="emailInput" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500">
             </div>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Objetivo financeiro</label>
-                <select id="goalSelect" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Objetivo financeiro</label>
+                <select id="goalSelect" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500">
                     <option value="BALANCED">Organizar os gastos</option>
                     <option value="DEBT_RECOVERY">Sair do vermelho</option>
                     <option value="INVESTMENT">Foco no futuro</option>
                 </select>
             </div>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Renda mensal (R$)</label>
-                <input type="number" id="incomeInput" step="0.01" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Renda mensal (R$)</label>
+                <input type="number" id="incomeInput" step="0.01" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500">
             </div>
-            <button type="submit" class="bg-[#1a1aff] text-white px-5 py-2 rounded-xl hover:bg-[#0f0fcc] transition">Salvar alterações</button>
+            <button type="submit" class="bg-[#1a1aff] dark:bg-blue-600 text-white px-5 py-2 rounded-xl hover:bg-[#0f0fcc] dark:hover:bg-blue-700 transition">Salvar alterações</button>
         </form>
     </div>
 
     <!-- Alterar senha -->
-    <div class="bg-white rounded-2xl shadow-sm p-6">
-        <h3 class="text-lg font-semibold mb-4">Alterar senha</h3>
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Alterar senha</h3>
         <form id="passwordForm" data-spa>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Senha atual</label>
-                <input type="password" id="currentPassword" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha atual</label>
+                <input type="password" id="currentPassword" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500">
             </div>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Nova senha</label>
-                <input type="password" id="newPassword" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nova senha</label>
+                <input type="password" id="newPassword" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500">
             </div>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Confirmar nova senha</label>
-                <input type="password" id="confirmPassword" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirmar nova senha</label>
+                <input type="password" id="confirmPassword" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500">
             </div>
-            <button type="submit" class="bg-[#1a1aff] text-white px-5 py-2 rounded-xl hover:bg-[#0f0fcc] transition">Alterar senha</button>
+            <button type="submit" class="bg-[#1a1aff] dark:bg-blue-600 text-white px-5 py-2 rounded-xl hover:bg-[#0f0fcc] dark:hover:bg-blue-700 transition">Alterar senha</button>
         </form>
     </div>
 </main>
 
+<script th:src="@{/js/theme.js}"></script>
+<script th:src="@{/js/transitions.js}"></script>
 <script th:inline="javascript">
     lucide.createIcons();
 
@@ -167,7 +183,7 @@
 
     function showMessage(text, type) {
         messageDiv.textContent = text;
-        messageDiv.className = `mb-4 p-3 rounded-lg text-sm ${type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+        messageDiv.className = `mb-4 p-3 rounded-lg text-sm ${type === 'success' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'}`;
         messageDiv.classList.remove('hidden');
         setTimeout(() => messageDiv.classList.add('hidden'), 4000);
     }
@@ -183,14 +199,25 @@
             document.getElementById('goalSelect').value = user.financialGoal || 'BALANCED';
             document.getElementById('incomeInput').value = user.monthlyIncome || 0;
             document.getElementById('userName').textContent = user.name || user.email;
-            document.getElementById('userAvatar').textContent = (user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase());
 
+            // Avatar no sidebar
+            const avatarDiv = document.getElementById('userAvatar');
+            if (user.avatarBase64) {
+                avatarDiv.style.backgroundImage = `url(data:image/jpeg;base64,${user.avatarBase64})`;
+                avatarDiv.style.backgroundSize = 'cover';
+                avatarDiv.textContent = '';
+            } else {
+                avatarDiv.textContent = (user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase());
+                avatarDiv.style.backgroundImage = '';
+            }
+
+            // Preview do avatar atual
             const preview = document.getElementById('currentAvatarPreview');
             if (user.avatarBase64) {
                 preview.innerHTML = `<img src="data:image/jpeg;base64,${user.avatarBase64}" class="w-full h-full object-cover">`;
             } else {
                 const initial = (user.name ? user.name.charAt(0) : user.email.charAt(0)).toUpperCase();
-                preview.innerHTML = `<span class="text-gray-500 text-3xl">${initial}</span>`;
+                preview.innerHTML = `<span class="text-gray-500 dark:text-gray-400 text-3xl">${initial}</span>`;
             }
         } catch (err) {
             console.error('loadUserData error:', err);
@@ -217,7 +244,7 @@
                 throw new Error(text || 'Falha ao atualizar perfil');
             }
             showMessage('Perfil atualizado com sucesso!', 'success');
-            await loadUserData(); // recarrega os dados
+            await loadUserData();
         } catch (err) {
             console.error('updateProfile error:', err);
             showMessage(err.message, 'error');
@@ -249,7 +276,7 @@
         }
     };
 
-    // Cropper logic
+    // Cropper logic (compatível com dark mode)
     const fileInput = document.getElementById('avatarFile');
     const cropperImage = document.getElementById('cropperImage');
     const cropperControls = document.getElementById('cropperControls');
@@ -313,6 +340,5 @@
 
     loadUserData();
 </script>
-<script th:src="@{/js/transitions.js}"></script>
 </body>
 </html>

@@ -17,4 +17,5 @@ public interface UserService {
     User updateProfile(String email, ProfileUpdateDTO dto);
     void changePassword(String email, PasswordChangeDTO dto);
     void updateAvatar(String email, byte[] avatar);
+    void updateTheme(String email, String theme);
 }

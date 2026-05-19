@@ -22,6 +22,10 @@ public class UserProfileController {
 
     private final UserService userService;
 
+    public record UserDto(Long id, String name, String email,
+                          FinancialGoal financialGoal, BigDecimal monthlyIncome,
+                          String avatarBase64, String theme) {}
+
     @GetMapping("/me")
     public ResponseEntity<UserDto> getCurrentUser(Principal principal) {
         User user = userService.findByEmail(principal.getName());
@@ -57,11 +61,15 @@ public class UserProfileController {
                 user.getEmail(),
                 user.getFinancialGoal(),
                 user.getMonthlyIncome(),
-                avatarBase64
+                avatarBase64,
+                user.getTheme()
         );
     }
 
-    public record UserDto(Long id, String name, String email,
-                          FinancialGoal financialGoal, BigDecimal monthlyIncome,
-                          String avatarBase64) {}
+    @PutMapping("/theme")
+    public ResponseEntity<Void> updateTheme(@RequestParam String theme, Principal principal){
+        userService.updateTheme(principal.getName(), theme);
+        return ResponseEntity.ok().build();
+    }
+
 }

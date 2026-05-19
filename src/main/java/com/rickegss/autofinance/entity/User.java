@@ -54,4 +54,7 @@ public class User {
     @Column(name = "monthly_income", precision = 12, scale = 2)
     private BigDecimal monthlyIncome;
 
+    @Column(nullable = false)
+    private String theme = "light";
+
 }

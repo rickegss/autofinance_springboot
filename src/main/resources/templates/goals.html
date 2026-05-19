@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: { fontFamily: { poppins: ['Poppins', 'sans-serif'] } }
             }
@@ -39,34 +40,40 @@
             color: white;
         }
         .nav-item.active svg { stroke: white; }
+        /* Dark mode overrides */
+        .dark .nav-item:hover {
+            background-color: #334155;
+            color: #60a5fa;
+        }
+        .dark .nav-item.active {
+            background-color: #2563eb;
+        }
     </style>
     <title>Autofinance - Metas</title>
 </head>
-<body class="font-poppins bg-[#f0f2f8] min-h-screen flex">
+<body class="font-poppins bg-[#f0f2f8] dark:bg-gray-900 min-h-screen flex">
 
-<aside class="w-[240px] bg-white min-h-screen flex flex-col px-5 py-6 shadow-[2px_0_12px_rgba(0,0,0,0.06)] flex-shrink-0">
+<aside class="w-[240px] bg-white dark:bg-gray-800 min-h-screen flex flex-col px-5 py-6 shadow-[2px_0_12px_rgba(0,0,0,0.06)] dark:shadow-none flex-shrink-0">
     <div class="flex items-center gap-2 mb-10 px-2">
-        <h1 class="text-[1.3rem] font-bold text-[#1a1aff]">Autofinance</h1>
-        <svg class="w-6 h-6 text-[#1a1aff]" viewBox="0 0 38 38" fill="none">...</svg>
+        <h1 class="text-[1.3rem] font-bold text-[#1a1aff] dark:text-blue-400">Autofinance</h1>
+        <svg class="w-6 h-6 text-[#1a1aff] dark:text-blue-400" viewBox="0 0 38 38" fill="none">...</svg>
     </div>
     <nav class="flex flex-col gap-1 flex-1">
         <a href="/dashboard" class="nav-item"><i data-lucide="home" class="w-4 h-4"></i><span>Início</span></a>
         <a href="/transactions" class="nav-item"><i data-lucide="arrow-left-right" class="w-4 h-4"></i><span>Lançamentos</span></a>
         <a href="/goals" class="nav-item active"><i data-lucide="target" class="w-4 h-4"></i><span>Metas</span></a>
         <a href="#" class="nav-item"><i data-lucide="bar-chart-2" class="w-4 h-4"></i><span>Relatórios</span></a>
-        <a href="#" class="nav-item"><i data-lucide="calendar" class="w-4 h-4"></i><span>Planejamento</span></a>
-        <a href="#" class="nav-item"><i data-lucide="tag" class="w-4 h-4"></i><span>Categorias</span></a>
         <a href="#" class="nav-item"><i data-lucide="calendar-days" class="w-4 h-4"></i><span>Calendário</span></a>
-        <a href="#" class="nav-item"><i data-lucide="settings" class="w-4 h-4"></i><span>Configurações</span></a>
+        <a href="/settings" class="nav-item"><i data-lucide="settings" class="w-4 h-4"></i><span>Configurações</span></a>
     </nav>
-    <div class="mt-auto pt-4 border-t border-[#f0f2f8]">
-        <a href="/profile" class="flex items-center gap-3 px-2 py-3 rounded-xl hover:bg-[#f0f2f8] transition-colors mb-2 no-underline">
-            <div class="w-9 h-9 rounded-full bg-[#1a1aff] flex items-center justify-center text-white font-bold text-sm flex-shrink-0" id="userAvatar">U</div>
+    <div class="mt-auto pt-4 border-t border-[#f0f2f8] dark:border-gray-700">
+        <a href="/profile" class="flex items-center gap-3 px-2 py-3 rounded-xl hover:bg-[#f0f2f8] dark:hover:bg-gray-700 transition-colors mb-2 no-underline">
+            <div class="w-9 h-9 rounded-full bg-[#1a1aff] dark:bg-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0" id="userAvatar">U</div>
             <div class="flex flex-col min-w-0">
-                <span class="text-[0.8rem] font-semibold text-[#1a1a2e] truncate" id="userName">Carregando...</span>
-                <span class="text-[0.72rem] text-[#666]">Ver perfil</span>
+                <span class="text-[0.8rem] font-semibold text-[#1a1a2e] dark:text-gray-200 truncate" id="userName">Carregando...</span>
+                <span class="text-[0.72rem] text-[#666] dark:text-gray-400">Ver perfil</span>
             </div>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-[#aaa] ml-auto flex-shrink-0"></i>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-[#aaa] dark:text-gray-500 ml-auto flex-shrink-0"></i>
         </a>
     </div>
 </aside>
@@ -74,10 +81,10 @@
 <main class="flex-1 p-8 overflow-y-auto">
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h2 class="text-[1.5rem] font-bold text-[#1a1a2e]">Minhas Metas</h2>
-            <p class="text-[0.85rem] text-[#666] mt-1">Acompanhe seu progresso financeiro</p>
+            <h2 class="text-[1.5rem] font-bold text-[#1a1a2e] dark:text-white">Minhas Metas</h2>
+            <p class="text-[0.85rem] text-[#666] dark:text-gray-400 mt-1">Acompanhe seu progresso financeiro</p>
         </div>
-        <button id="newGoalBtn" class="bg-[#1a1aff] text-white px-5 py-2 rounded-xl flex items-center gap-2 hover:bg-[#0f0fcc] transition">
+        <button id="newGoalBtn" class="bg-[#1a1aff] dark:bg-blue-600 text-white px-5 py-2 rounded-xl flex items-center gap-2 hover:bg-[#0f0fcc] dark:hover:bg-blue-700 transition">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span>Nova meta</span>
         </button>
@@ -86,34 +93,34 @@
     <div id="messageDiv" class="hidden mb-4 p-3 rounded-lg text-sm"></div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="goalsContainer">
-        <div class="col-span-full text-center text-gray-500 py-12">Carregando metas...</div>
+        <div class="col-span-full text-center text-gray-500 dark:text-gray-400 py-12">Carregando metas...</div>
     </div>
 </main>
 
 <!-- Modal para criar nova meta -->
 <div id="goalModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-2xl w-full max-w-md p-6 relative">
-        <button id="closeModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-6 relative">
+        <button id="closeModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
             <i data-lucide="x" class="w-5 h-5"></i>
         </button>
-        <h3 class="text-xl font-bold text-[#1a1a2e] mb-4">Nova Meta</h3>
+        <h3 class="text-xl font-bold text-[#1a1a2e] dark:text-white mb-4">Nova Meta</h3>
         <form id="goalForm" data-spa>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Nome da meta *</label>
-                <input type="text" id="goalName" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome da meta *</label>
+                <input type="text" id="goalName" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 dark:text-white">
             </div>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Valor alvo (R$) *</label>
-                <input type="number" id="targetAmount" step="0.01" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valor alvo (R$) *</label>
+                <input type="number" id="targetAmount" step="0.01" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 dark:text-white">
             </div>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Valor atual (R$)</label>
-                <input type="number" id="currentAmount" step="0.01" class="w-full border border-gray-300 rounded-lg px-4 py-2" placeholder="0,00">
-                <p class="text-xs text-gray-500 mt-1">Se não informado, iniciará em R$ 0,00</p>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valor atual (R$)</label>
+                <input type="number" id="currentAmount" step="0.01" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 dark:text-white" placeholder="0,00">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Se não informado, iniciará em R$ 0,00</p>
             </div>
             <div class="flex justify-end gap-2">
-                <button type="button" id="cancelModalBtn" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-[#1a1aff] text-white rounded-lg hover:bg-[#0f0fcc]">Salvar</button>
+                <button type="button" id="cancelModalBtn" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-[#1a1aff] dark:bg-blue-600 text-white rounded-lg hover:bg-[#0f0fcc] dark:hover:bg-blue-700">Salvar</button>
             </div>
         </form>
     </div>
@@ -121,25 +128,27 @@
 
 <!-- Modal para adicionar progresso -->
 <div id="progressModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-2xl w-full max-w-md p-6 relative">
-        <button id="closeProgressModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-6 relative">
+        <button id="closeProgressModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
             <i data-lucide="x" class="w-5 h-5"></i>
         </button>
-        <h3 id="progressModalTitle" class="text-xl font-bold text-[#1a1a2e] mb-2">Adicionar Progresso</h3>
-        <p id="progressGoalInfo" class="text-sm text-gray-600 mb-4"></p>
+        <h3 id="progressModalTitle" class="text-xl font-bold text-[#1a1a2e] dark:text-white mb-2">Adicionar Progresso</h3>
+        <p id="progressGoalInfo" class="text-sm text-gray-600 dark:text-gray-400 mb-4"></p>
         <form id="progressForm" data-spa>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Valor a adicionar (R$)</label>
-                <input type="number" id="progressAmount" step="0.01" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valor a adicionar (R$)</label>
+                <input type="number" id="progressAmount" step="0.01" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 dark:text-white">
             </div>
             <div class="flex justify-end gap-2">
-                <button type="button" id="cancelProgressBtn" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-[#1a1aff] text-white rounded-lg hover:bg-[#0f0fcc]">Adicionar</button>
+                <button type="button" id="cancelProgressBtn" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-[#1a1aff] dark:bg-blue-600 text-white rounded-lg hover:bg-[#0f0fcc] dark:hover:bg-blue-700">Adicionar</button>
             </div>
         </form>
     </div>
 </div>
 
+<script th:src="@{/js/theme.js}"></script>
+<script th:src="@{/js/transitions.js}"></script>
 <script th:inline="javascript">
     lucide.createIcons();
 
@@ -160,7 +169,7 @@
 
     function showMessage(text, type) {
         messageDiv.textContent = text;
-        messageDiv.className = `mb-4 p-3 rounded-lg text-sm ${type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+        messageDiv.className = `mb-4 p-3 rounded-lg text-sm ${type === 'success' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'}`;
         messageDiv.classList.remove('hidden');
         setTimeout(() => messageDiv.classList.add('hidden'), 4000);
     }
@@ -174,7 +183,7 @@
             }
             const goals = await response.json();
             if (!goals.length) {
-                goalsContainer.innerHTML = '<div class="col-span-full text-center text-gray-500 py-12">Nenhuma meta cadastrada. Clique em "Nova meta" para começar.</div>';
+                goalsContainer.innerHTML = '<div class="col-span-full text-center text-gray-500 dark:text-gray-400 py-12">Nenhuma meta cadastrada. Clique em "Nova meta" para começar.</div>';
                 return;
             }
             let html = '';
@@ -182,28 +191,28 @@
                 const percent = (goal.currentAmount / goal.targetAmount) * 100;
                 const percentFormatted = percent.toFixed(0);
                 html += `
-                    <div class="bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-5 hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-3">
-                            <h3 class="text-lg font-bold text-[#1a3a7a]">${escapeHtml(goal.name)}</h3>
+                            <h3 class="text-lg font-bold text-[#1a3a7a] dark:text-blue-300">${escapeHtml(goal.name)}</h3>
                             <div class="flex gap-2">
-                                <button class="add-progress-btn text-blue-600 hover:text-blue-800" data-id="${goal.id}" data-name="${escapeHtml(goal.name)}" data-current="${goal.currentAmount}" data-target="${goal.targetAmount}">
+                                <button class="add-progress-btn text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300" data-id="${goal.id}" data-name="${escapeHtml(goal.name)}" data-current="${goal.currentAmount}" data-target="${goal.targetAmount}">
                                     <i data-lucide="plus-circle" class="w-5 h-5"></i>
                                 </button>
-                                <button class="delete-goal-btn text-red-600 hover:text-red-800" data-id="${goal.id}">
+                                <button class="delete-goal-btn text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300" data-id="${goal.id}">
                                     <i data-lucide="trash-2" class="w-5 h-5"></i>
                                 </button>
                             </div>
                         </div>
                         <div class="mb-2">
-                            <div class="flex justify-between text-sm text-gray-600 mb-1">
+                            <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
                                 <span>Progresso</span>
                                 <span>${percentFormatted}%</span>
                             </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                <div class="bg-[#1a1aff] rounded-full h-2.5 transition-all duration-500" style="width: ${percent}%"></div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                <div class="bg-[#1a1aff] dark:bg-blue-500 rounded-full h-2.5 transition-all duration-500" style="width: ${percent}%"></div>
                             </div>
                         </div>
-                        <p class="text-sm text-gray-500">${formatter.format(goal.currentAmount)} / ${formatter.format(goal.targetAmount)}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">${formatter.format(goal.currentAmount)} / ${formatter.format(goal.targetAmount)}</p>
                     </div>
                 `;
             });
@@ -212,7 +221,7 @@
             attachEvents();
         } catch (err) {
             console.error('loadGoals error:', err);
-            goalsContainer.innerHTML = `<div class="col-span-full text-center text-red-500 py-12">Erro ao carregar metas: ${err.message}</div>`;
+            goalsContainer.innerHTML = `<div class="col-span-full text-center text-red-500 dark:text-red-400 py-12">Erro ao carregar metas: ${err.message}</div>`;
             showMessage('Erro ao carregar metas. Verifique o console.', 'error');
         }
     }
@@ -235,7 +244,7 @@
         currentGoalCurrent = parseFloat(btn.getAttribute('data-current'));
         currentGoalTarget = parseFloat(btn.getAttribute('data-target'));
         document.getElementById('progressModalTitle').innerText = 'Adicionar Progresso';
-        document.getElementById('progressGoalInfo').innerHTML = `Meta: <strong>${escapeHtml(currentGoalName)}</strong><br>Atual: ${formatter.format(currentGoalCurrent)} | Alvo: ${formatter.format(currentGoalTarget)}`;
+        document.getElementById('progressGoalInfo').innerHTML = `Meta: <strong class="dark:text-white">${escapeHtml(currentGoalName)}</strong><br>Atual: ${formatter.format(currentGoalCurrent)} | Alvo: ${formatter.format(currentGoalTarget)}`;
         document.getElementById('progressAmount').value = '';
         progressModal.classList.remove('hidden');
     }
@@ -349,7 +358,15 @@
             const res = await fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } });
             if (res.ok) {
                 const user = await res.json();
-                document.getElementById('userAvatar').textContent = (user.name ? user.name.charAt(0) : user.email.charAt(0)).toUpperCase();
+                const avatarDiv = document.getElementById('userAvatar');
+                if (user.avatarBase64) {
+                    avatarDiv.style.backgroundImage = `url(data:image/jpeg;base64,${user.avatarBase64})`;
+                    avatarDiv.style.backgroundSize = 'cover';
+                    avatarDiv.textContent = '';
+                } else {
+                    avatarDiv.textContent = (user.name ? user.name.charAt(0) : user.email.charAt(0)).toUpperCase();
+                    avatarDiv.style.backgroundImage = '';
+                }
                 document.getElementById('userName').textContent = user.name || user.email;
             }
         } catch (e) { console.warn(e); }
@@ -358,6 +375,5 @@
     loadUserData();
     loadGoals();
 </script>
-<script th:src="@{/js/transitions.js}"></script>
 </body>
 </html>
