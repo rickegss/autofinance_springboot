@@ -93,4 +93,13 @@ public class UserServiceImpl implements UserService{
         user.setAvatar(avatar);
         userRepository.save(user);
     }
+
+    @Override
+    @Transactional
+    public void updateTheme(String email, String theme){
+        User user = findByEmail(email);
+        user.setTheme(theme);
+        userRepository.save(user);
+    }
+
 }

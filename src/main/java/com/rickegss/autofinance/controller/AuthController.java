@@ -39,6 +39,7 @@ public class AuthController {
             User user = User.builder()
                     .email(userDTO.getEmail())
                     .password(userDTO.getPassword())
+                    .theme("light")
                     .build();
             userService.register(user);
         } catch(IllegalArgumentException e){
