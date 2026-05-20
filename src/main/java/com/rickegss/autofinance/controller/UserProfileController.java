@@ -23,8 +23,8 @@ public class UserProfileController {
     private final UserService userService;
 
     public record UserDto(Long id, String name, String email,
-                          FinancialGoal financialGoal, BigDecimal monthlyIncome,
-                          String avatarBase64, String theme) {}
+                      FinancialGoal financialGoal, BigDecimal monthlyIncome,
+                      String avatarBase64, String theme, Integer financialMonthDay) {}
 
     @GetMapping("/me")
     public ResponseEntity<UserDto> getCurrentUser(Principal principal) {
@@ -56,19 +56,26 @@ public class UserProfileController {
             avatarBase64 = Base64.getEncoder().encodeToString(user.getAvatar());
         }
         return new UserDto(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getFinancialGoal(),
-                user.getMonthlyIncome(),
-                avatarBase64,
-                user.getTheme()
+            user.getId(),
+            user.getName(),
+            user.getEmail(),
+            user.getFinancialGoal(),
+            user.getMonthlyIncome(),
+            avatarBase64,
+            user.getTheme(),
+            user.getFinancialMonthDay()
         );
     }
 
     @PutMapping("/theme")
     public ResponseEntity<Void> updateTheme(@RequestParam String theme, Principal principal){
         userService.updateTheme(principal.getName(), theme);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/financial-month-day")
+    public ResponseEntity<Void> updateFinancialMonthDay(@RequestParam Integer day, Principal principal) {
+        userService.updateFinancialMonthDay(principal.getName(), day);
         return ResponseEntity.ok().build();
     }
 
