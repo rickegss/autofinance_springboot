@@ -50,6 +50,29 @@ O projeto está disponível gratuitamente em: [https://autofinance-tjkc.onrender
 
 ---
 
+## Testes (unitários e de integração)
+
+Para garantir a confiabilidade do sistema, foram implementados testes automatizados cobrindo as principais camadas da aplicação:
+
+### Testes unitários
+- **UserServiceImplTest**: valida registro de usuário, atualização de perfil, alteração de senha (com casos de erro), upload de avatar e atualização do dia de fechamento.
+- **TransactionServiceImplTest**: testa criação de transação, lançamento de exceção para usuário inexistente, deleção com verificação de propriedade (acesso negado se o usuário não for o dono) e transação não encontrada.
+- **GoalServiceImplTest**: criação de meta, listagem por usuário, adição de progresso (atualiza o valor atual), deleção e tratamento de acesso negado.
+- **RecurringTransactionServiceTest**: verifica a geração correta de transações recorrentes (mesmo mês, mês seguinte, ajuste para último dia do mês) e a prevenção de duplicatas.
+
+### Testes de integração
+- **TransactionControllerIntegrationTest**: testa o endpoint de criação de transação (com dados válidos e inválidos) e o endpoint de listagem, utilizando `@WithMockUser` para simular autenticação e `@AutoConfigureMockMvc` para chamadas HTTP.
+- **UserProfileControllerIntegrationTest**: cobre os endpoints `/me`, atualização de perfil e alteração de senha (com credenciais corretas, senha atual errada e confirmação divergente).
+
+### Execução dos testes
+```bash
+./mvnw test
+```
+
+Os testes utilizam um banco H2 em memória (configurado em `src/test/resources/application.properties`) e são executados automaticamente no pipeline de build (GitHub Actions ou Render). O foco foi garantir a robustez das regras de negócio, principalmente as que envolvem segurança (autorização) e integridade dos dados.
+
+---
+
 ## O que aprendi com este projeto
 
 Como iniciante em back-end, enfrentei vários desafios que me ensinaram muito:
@@ -111,6 +134,7 @@ src/main/resources/
 ├── templates/            # HTML Thymeleaf
 └── application*.properties
 ```
+
 ---
 
 ## Segurança
