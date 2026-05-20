@@ -11,19 +11,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public User register(User user){
+    public User register(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new IllegalArgumentException("Email já cadastrado.");
         }
@@ -33,20 +33,18 @@ public class UserServiceImpl implements UserService{
 
     @Override
     @Transactional
-    public void saveUserCategories(String email, List<String> categories){
+    public void saveUserCategories(String email, List<String> categories) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
-
         user.setPreferredCategories(categories);
         userRepository.save(user);
     }
 
     @Override
     @Transactional
-    public void saveUserDetails(String email, FinancialGoal goal, BigDecimal income){
+    public void saveUserDetails(String email, FinancialGoal goal, BigDecimal income) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
-
         user.setFinancialGoal(goal);
         user.setMonthlyIncome(income);
         userRepository.save(user);
@@ -60,7 +58,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     @Transactional
-    public User updateProfile(String email, ProfileUpdateDTO dto){
+    public User updateProfile(String email, ProfileUpdateDTO dto) {
         User user = findByEmail(email);
         user.setName(dto.name());
         user.setEmail(dto.email());
@@ -71,15 +69,15 @@ public class UserServiceImpl implements UserService{
 
     @Override
     @Transactional
-    public void changePassword(String email, PasswordChangeDTO dto){
+    public void changePassword(String email, PasswordChangeDTO dto) {
         if (!dto.newPassword().equals(dto.confirmNewPassword())) {
             throw new IllegalArgumentException("As novas senhas não coincidem");
         }
         User user = findByEmail(email);
-        if (!passwordEncoder.matches(dto.currentPassword(), user.getPassword())){
+        if (!passwordEncoder.matches(dto.currentPassword(), user.getPassword())) {
             throw new IllegalArgumentException("Senha atual incorreta");
         }
-        if (dto.newPassword().equals(user.getPassword())){
+        if (dto.newPassword().equals(user.getPassword())) {
             throw new IllegalArgumentException("A nova senha não pode ser igual a anterior");
         }
         user.setPassword(passwordEncoder.encode(dto.newPassword()));
@@ -88,7 +86,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     @Transactional
-    public void updateAvatar(String email, byte[] avatar){
+    public void updateAvatar(String email, byte[] avatar) {
         User user = findByEmail(email);
         user.setAvatar(avatar);
         userRepository.save(user);
@@ -96,7 +94,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     @Transactional
-    public void updateTheme(String email, String theme){
+    public void updateTheme(String email, String theme) {
         User user = findByEmail(email);
         user.setTheme(theme);
         userRepository.save(user);
@@ -112,5 +110,4 @@ public class UserServiceImpl implements UserService{
         user.setFinancialMonthDay(day);
         userRepository.save(user);
     }
-
 }
