@@ -7,6 +7,7 @@
   <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
@@ -47,6 +48,7 @@
     .dark .nav-item.active {
         background-color: #2563eb;
     }
+    canvas { max-height: 300px; }
   </style>
   <title>Autofinance - Relatórios por Período</title>
 </head>
@@ -122,6 +124,12 @@
       <div id="categoriesList" class="flex flex-wrap gap-3"></div>
     </div>
 
+    <!-- GRÁFICO DE GASTOS POR DIA -->
+    <div id="dailyChartContainer" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 mb-8 hidden">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">📉 Gastos por dia do mês</h3>
+      <canvas id="dailyExpensesChart" width="400" height="200"></canvas>
+    </div>
+
     <div id="transactionsTable" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden hidden">
       <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">📋 Transações do período</h3>
@@ -138,8 +146,7 @@
           </tr>
           </thead>
           <tbody id="transactionsTableBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-          <tr><td colspan="5" class="text-center py-8 text-gray-500 dark:text-gray-400">Selecione um período</td></tr>
-          </tbody>
+          <tr><td colspan="5" class="text-center py-8 text-gray-500 dark:text-gray-400">Selecione um período</td>\n          </tbody>
         </table>
       </div>
     </div>
@@ -156,6 +163,7 @@
   const formatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
   let cyclesList = [];
+  let currentChart = null;
 
   async function loadUserData() {
       try {
@@ -216,12 +224,14 @@
           if (!res.ok) throw new Error('Falha ao carregar dados do período');
           const data = await res.json();
 
+          // Atualiza cards
           document.getElementById('reportIncome').textContent = formatter.format(data.totalIncome);
           document.getElementById('reportExpenses').textContent = formatter.format(data.totalExpenses);
           document.getElementById('reportSavings').textContent = formatter.format(data.savings);
           document.getElementById('reportSavingsPercent').textContent = `${data.savingsPercentage || 0}%`;
           document.getElementById('resumeCards').classList.remove('hidden');
 
+          // Categorias
           const categoriesDiv = document.getElementById('categoriesList');
           categoriesDiv.innerHTML = '';
           const categories = data.expensesByCategory || {};
@@ -239,6 +249,47 @@
               document.getElementById('topCategories').classList.remove('hidden');
           }
 
+          // Gráfico de gastos por dia
+          const dailyExpenses = new Array(32).fill(0);
+          data.transactions.forEach(tx => {
+              if (tx.type === 'DESPESA') {
+                  const day = new Date(tx.date).getDate();
+                  dailyExpenses[day] += tx.amount;
+              }
+          });
+          const labels = Array.from({ length: 31 }, (_, i) => (i+1).toString());
+          const values = dailyExpenses.slice(1); // dias 1..31
+
+          const ctx = document.getElementById('dailyExpensesChart').getContext('2d');
+          if (currentChart) currentChart.destroy();
+          const isDark = document.documentElement.classList.contains('dark');
+          currentChart = new Chart(ctx, {
+              type: 'bar',
+              data: {
+                  labels: labels,
+                  datasets: [{
+                      label: 'Gastos (R$)',
+                      data: values,
+                      backgroundColor: isDark ? '#60a5fa' : '#3b82f6',
+                      borderRadius: 6
+                  }]
+              },
+              options: {
+                  responsive: true,
+                  maintainAspectRatio: true,
+                  plugins: {
+                      tooltip: { callbacks: { label: (ctx) => formatter.format(ctx.raw) } },
+                      legend: { labels: { color: isDark ? '#e5e7eb' : '#1f2937' } }
+                  },
+                  scales: {
+                      y: { beginAtZero: true, ticks: { callback: (val) => formatter.format(val) }, grid: { color: isDark ? '#374151' : '#e5e7eb' } },
+                      x: { title: { display: true, text: 'Dia do mês', color: isDark ? '#e5e7eb' : '#1f2937' }, ticks: { color: isDark ? '#e5e7eb' : '#1f2937' } }
+                  }
+              }
+          });
+          document.getElementById('dailyChartContainer').classList.remove('hidden');
+
+          // Tabela
           const tbody = document.getElementById('transactionsTableBody');
           if (data.transactions && data.transactions.length > 0) {
               let html = '';
@@ -254,7 +305,7 @@
                           </td>
                           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">${escapeHtml(tx.category)}</td>
                           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">${new Date(tx.date).toLocaleDateString('pt-BR')}</td>
-                      </td>
+                      </tr>
                   `;
               });
               tbody.innerHTML = html;
@@ -274,6 +325,19 @@
       if (!str) return '';
       return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]);
   }
+
+  const observer = new MutationObserver(() => {
+      if (currentChart && document.getElementById('dailyChartContainer').classList.contains('hidden') === false) {
+          const isDark = document.documentElement.classList.contains('dark');
+          currentChart.data.datasets[0].backgroundColor = isDark ? '#60a5fa' : '#3b82f6';
+          currentChart.options.plugins.legend.labels.color = isDark ? '#e5e7eb' : '#1f2937';
+          currentChart.options.scales.x.ticks.color = isDark ? '#e5e7eb' : '#1f2937';
+          currentChart.options.scales.x.title.color = isDark ? '#e5e7eb' : '#1f2937';
+          currentChart.options.scales.y.grid.color = isDark ? '#374151' : '#e5e7eb';
+          currentChart.update();
+      }
+  });
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
   document.getElementById('cycleSelect').addEventListener('change', (e) => {
       const idx = e.target.value;
