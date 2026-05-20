@@ -17,6 +17,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class AuthController {
     private final UserService userService;
 
+    @GetMapping("/")
+    public String root() {
+        return "redirect:/login";
+    }
+    
     @GetMapping("/login")
     public String login(){return "login";}
 
