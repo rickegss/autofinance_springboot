@@ -3,7 +3,6 @@ package com.rickegss.autofinance.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -20,7 +19,6 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = true)
     private String description;
 
     @Column(nullable = false, precision = 12, scale = 2)
@@ -49,5 +47,4 @@ public class Transaction {
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
     private User user;
-
 }

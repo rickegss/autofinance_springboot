@@ -102,4 +102,15 @@ public class UserServiceImpl implements UserService{
         userRepository.save(user);
     }
 
+    @Override
+    @Transactional
+    public void updateFinancialMonthDay(String email, Integer day) {
+        if (day == null || day < 1 || day > 28) {
+            throw new IllegalArgumentException("Dia deve ser entre 1 e 28");
+        }
+        User user = findByEmail(email);
+        user.setFinancialMonthDay(day);
+        userRepository.save(user);
+    }
+
 }

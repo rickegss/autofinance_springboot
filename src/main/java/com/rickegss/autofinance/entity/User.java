@@ -2,8 +2,6 @@ package com.rickegss.autofinance.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Type;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +25,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "name")
     private String name;
 
-    @Column(name = "avatar", columnDefinition = "bytea")
+    @Column(columnDefinition = "bytea")
     private byte[] avatar;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -48,16 +45,16 @@ public class User {
     private List<Goal> goals = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "financial_goal")
     private FinancialGoal financialGoal;
 
-    @Column(name = "monthly_income", precision = 12, scale = 2)
+    @Column(precision = 12, scale = 2)
     private BigDecimal monthlyIncome;
 
     @Column(nullable = false)
+    @Builder.Default
     private String theme = "light";
 
     @Column(name = "financial_month_day")
+    @Builder.Default
     private Integer financialMonthDay = 1;
-
 }
