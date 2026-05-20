@@ -49,9 +49,15 @@
     .dark .nav-item.active {
         background-color: #2563eb;
     }
+    /* Calendário compacto */
     .calendar-day {
         aspect-ratio: 1 / 1;
         transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 500;
     }
     .calendar-day.has-transaction {
         background-color: #fef3c7;
@@ -107,7 +113,7 @@
 </aside>
 
 <main class="flex-1 p-8 overflow-y-auto">
-  <div class="max-w-5xl mx-auto">
+  <div class="max-w-4xl mx-auto">
     <div class="flex justify-between items-center mb-6">
       <div>
         <h2 class="text-2xl font-bold text-[#1a1a2e] dark:text-white">Calendário Financeiro</h2>
@@ -120,14 +126,20 @@
       </div>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 mb-6">
-      <div class="grid grid-cols-7 gap-1 text-center font-semibold text-gray-600 dark:text-gray-300 mb-2">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 mb-6">
+      <div class="grid grid-cols-7 gap-1 text-center font-semibold text-gray-600 dark:text-gray-300 mb-2 text-sm">
         <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
       </div>
       <div id="calendarGrid" class="grid grid-cols-7 gap-1"></div>
     </div>
 
-    <div id="selectedDayInfo" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 hidden">
+    <!-- Resumo: fechamento do mês + transações recorrentes -->
+    <div id="summaryBox" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4">
+      <h3 class="text-md font-semibold text-gray-800 dark:text-white mb-2">📌 Resumo do mês</h3>
+      <div id="summaryContent" class="text-sm text-gray-600 dark:text-gray-300 space-y-1"></div>
+    </div>
+
+    <div id="selectedDayInfo" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 mt-6 hidden">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Transações do dia <span id="selectedDate"></span></h3>
       <div id="dayTransactionsList" class="space-y-2 max-h-60 overflow-y-auto"></div>
     </div>
@@ -145,6 +157,7 @@
 
   let currentDate = new Date();
   let allTransactions = [];
+  let allRecurringTemplates = []; // transações recorrentes (templates)
   let userFinancialDay = 1;
 
   async function loadUserData() {
@@ -171,7 +184,10 @@
       try {
           const res = await fetch('/api/transactions', { headers: { [csrfHeader]: csrfToken } });
           if (!res.ok) throw new Error();
-          allTransactions = await res.json();
+          const all = await res.json();
+          // Separa as transações recorrentes (templates) das normais
+          allTransactions = all.filter(t => !t.recurring);
+          allRecurringTemplates = all.filter(t => t.recurring === true);
       } catch (e) { console.error(e); }
   }
 
@@ -183,6 +199,61 @@
           const d = new Date(t.date);
           return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day;
       });
+  }
+
+  // Retorna as transações recorrentes que aconteceriam no mês atual (baseado no recurringDay)
+  function getRecurringForMonth(year, month) {
+      const recurringThisMonth = [];
+      const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+      allRecurringTemplates.forEach(tx => {
+          let day = tx.recurringDay;
+          if (!day) return;
+          // Ajusta se o dia for maior que o último dia do mês (ex: 31 em fevereiro)
+          if (day > lastDayOfMonth) day = lastDayOfMonth;
+          const dateObj = new Date(year, month, day);
+          // Verifica se não expirou
+          if (tx.recurringEndDate) {
+              const endDate = new Date(tx.recurringEndDate);
+              if (dateObj > endDate) return;
+          }
+          recurringThisMonth.push({
+              day: day,
+              description: tx.description || 'Sem descrição',
+              amount: tx.amount,
+              category: tx.category,
+              dateObj: dateObj
+          });
+      });
+      return recurringThisMonth;
+  }
+
+  function updateSummary() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+      const monthName = monthNames[month];
+
+      // 1. Fechamento do mês
+      let closingDay = userFinancialDay;
+      const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+      if (closingDay > lastDayOfMonth) closingDay = lastDayOfMonth;
+      const closingDateFormatted = `${closingDay.toString().padStart(2,'0')}/${(month+1).toString().padStart(2,'0')}`;
+      let html = `<p>📅 <span class="font-semibold">${closingDateFormatted}:</span> Fechamento do mês (${monthName})</p>`;
+
+      // 2. Transações recorrentes do mês
+      const recurring = getRecurringForMonth(year, month);
+      if (recurring.length > 0) {
+          html += `<p class="mt-2 font-semibold">🔄 Transações recorrentes previstas:</p><ul class="list-disc pl-5 space-y-1">`;
+          recurring.forEach(rec => {
+              const dayStr = rec.day.toString().padStart(2,'0');
+              const dateLabel = `${dayStr}/${(month+1).toString().padStart(2,'0')}`;
+              html += `<li>📌 <span class="font-medium">${dateLabel}:</span> ${escapeHtml(rec.description)} — ${formatter.format(rec.amount)}</li>`;
+          });
+          html += `</ul>`;
+      } else {
+          html += `<p class="mt-2 text-gray-500 dark:text-gray-400">Nenhuma transação recorrente para este mês.</p>`;
+      }
+      document.getElementById('summaryContent').innerHTML = html;
   }
 
   function buildCalendar() {
@@ -201,7 +272,7 @@
 
       for (let i = 0; i < startDayOfWeek; i++) {
           const emptyDiv = document.createElement('div');
-          emptyDiv.className = 'calendar-day p-2 text-center text-gray-400 dark:text-gray-600';
+          emptyDiv.className = 'calendar-day p-1 text-center text-gray-400 dark:text-gray-600';
           emptyDiv.textContent = '';
           grid.appendChild(emptyDiv);
       }
@@ -209,13 +280,16 @@
       for (let d = 1; d <= daysInMonth; d++) {
           const dateObj = new Date(year, month, d);
           const hasTransaction = getTransactionsForDate(dateObj).length > 0;
-          const isClosingDay = (d === userFinancialDay);
+          const isClosingDay = (d === userFinancialDay) || (d === lastDayOfMonth && userFinancialDay > lastDayOfMonth);
           const dayDiv = document.createElement('div');
-          dayDiv.className = `calendar-day p-2 text-center rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${hasTransaction ? 'has-transaction' : ''} ${isClosingDay ? 'closing-day' : ''}`;
+          dayDiv.className = `calendar-day p-1 text-center rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${hasTransaction ? 'has-transaction' : ''} ${isClosingDay ? 'closing-day' : ''}`;
           dayDiv.textContent = d;
           dayDiv.addEventListener('click', () => showDayDetails(dateObj));
           grid.appendChild(dayDiv);
       }
+
+      // Atualiza o resumo abaixo do calendário
+      updateSummary();
   }
 
   function showDayDetails(date) {
