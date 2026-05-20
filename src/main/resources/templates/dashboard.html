@@ -116,11 +116,7 @@
     <div class="flex justify-between items-start mb-8">
         <div>
             <h2 class="text-[1.5rem] font-bold text-[#1a1a2e] dark:text-white">Visão geral</h2>
-            <p class="text-[0.85rem] text-[#666] dark:text-gray-400 mt-1" id="current-date">Carregando...</p>
-        </div>
-        <div class="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-xl px-4 py-2 shadow-sm dark:shadow-gray-900/30 cursor-pointer hover:shadow-md transition-shadow">
-            <span class="text-[0.85rem] font-medium text-[#1a1a2e] dark:text-gray-200">Este mês</span>
-            <i data-lucide="chevron-down" class="w-4 h-4 text-[#666] dark:text-gray-400"></i>
+            <p class="text-[0.85rem] text-[#666] dark:text-gray-400 mt-1" id="current-cycle-label">Carregando ciclo...</p>
         </div>
     </div>
 
@@ -132,7 +128,7 @@
             <button class="mt-3 text-[0.78rem] text-[#1a1aff] dark:text-blue-400 font-semibold hover:underline" onclick="window.location.href='/profile'">Editar</button>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-gray-900/20">
-            <p class="text-[0.8rem] text-[#666] dark:text-gray-400 font-medium mb-1">Receitas do mês</p>
+            <p class="text-[0.8rem] text-[#666] dark:text-gray-400 font-medium mb-1">Receitas do ciclo</p>
             <p class="text-[1.8rem] font-extrabold text-[#10b981] dark:text-emerald-400" id="card-income-actual">R$ 0,00</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-gray-900/20">
@@ -163,7 +159,7 @@
             </div>
             <div id="bubble-container"></div>
             <div class="flex gap-4 mt-4 flex-wrap" id="bubble-legend"></div>
-            <div id="no-expenses-message" class="text-center text-gray-500 dark:text-gray-400 py-8 hidden">Nenhuma despesa neste mês</div>
+            <div id="no-expenses-message" class="text-center text-gray-500 dark:text-gray-400 py-8 hidden">Nenhuma despesa neste ciclo</div>
         </div>
 
         <!-- Progresso das metas -->
@@ -188,14 +184,13 @@
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
     const formatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
-    // Datas
-    const today = new Date();
-    const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth() + 1;
-    document.getElementById('current-date').textContent = today.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }).replace(/^./, l => l.toUpperCase());
+    // Função para formatar data
+    function formatDate(dateStr) {
+        return new Date(dateStr).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
 
     // Carrega dados do usuário (avatar, nome, renda)
-    async function loadUserAndIncome() {
+    async function loadUserData() {
         try {
             const res = await fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } });
             if (!res.ok) throw new Error();
@@ -211,48 +206,34 @@
             }
             document.getElementById('user-email-display').textContent = user.name || user.email;
             document.getElementById('card-income').textContent = formatter.format(user.monthlyIncome || 0);
-            return user.monthlyIncome || 0;
+            return { monthlyIncome: user.monthlyIncome || 0 };
         } catch (e) {
+            console.warn('Erro ao carregar dados do usuário:', e);
             document.getElementById('card-income').textContent = 'R$ 0,00';
-            return 0;
+            return { monthlyIncome: 0 };
         }
     }
 
-    // Carrega transações, desenha bolhas e atualiza receitas reais
-    async function loadDashboardTransactions(monthlyIncome) {
+    // Carrega dados do ciclo atual do backend e atualiza todo o dashboard
+    async function loadCycleData() {
         try {
-            const txRes = await fetch('/api/transactions', { headers: { [csrfHeader]: csrfToken } });
-            if (!txRes.ok) throw new Error('Erro ao carregar transações');
-            const transactions = await txRes.json();
+            const res = await fetch('/api/transactions/current-cycle', { headers: { [csrfHeader]: csrfToken } });
+            if (!res.ok) throw new Error('Erro ao carregar dados do ciclo');
+            const data = await res.json();
 
-            const startDate = new Date(currentYear, currentMonth - 1, 1);
-            const endDate = new Date(currentYear, currentMonth, 0);
-            const monthTransactions = transactions.filter(t => {
-                const d = new Date(t.date);
-                return d >= startDate && d <= endDate;
-            });
+            // Atualiza label do ciclo
+            const cycleLabel = document.getElementById('current-cycle-label');
+            cycleLabel.innerHTML = `Ciclo: ${formatDate(data.cycleStart)} — ${formatDate(data.cycleEnd)}`;
 
-            let totalExpenses = 0;
-            let totalIncome = 0;
-            const categoryMap = new Map();
-            for (const tx of monthTransactions) {
-                const amount = parseFloat(tx.amount);
-                if (tx.type === 'DESPESA') {
-                    totalExpenses += amount;
-                    categoryMap.set(tx.category, (categoryMap.get(tx.category) || 0) + amount);
-                } else if (tx.type === 'RECEITA') {
-                    totalIncome += amount;
-                }
-            }
+            // Atualiza cards de valores
+            document.getElementById('card-income-actual').textContent = formatter.format(data.totalIncome);
+            document.getElementById('card-expenses').textContent = formatter.format(data.totalExpenses);
+            document.getElementById('card-savings').textContent = formatter.format(data.savings);
 
-            document.getElementById('card-income-actual').textContent = formatter.format(totalIncome);
-
-            const savings = monthlyIncome - totalExpenses;
-            const expensesPercent = monthlyIncome > 0 ? (totalExpenses / monthlyIncome) * 100 : 0;
-            const savingsPercent = monthlyIncome > 0 ? (savings / monthlyIncome) * 100 : 0;
-
-            document.getElementById('card-expenses').textContent = formatter.format(totalExpenses);
-            document.getElementById('card-savings').textContent = formatter.format(savings);
+            // Percentuais
+            const monthlyIncome = parseFloat(document.getElementById('card-income').textContent.replace(/[^0-9,-]/g, '').replace(',', '.')) || 0;
+            const expensesPercent = monthlyIncome > 0 ? (data.totalExpenses / monthlyIncome) * 100 : 0;
+            const savingsPercent = monthlyIncome > 0 ? (data.savings / monthlyIncome) * 100 : 0;
             document.getElementById('expenses-pct').textContent = `${expensesPercent.toFixed(0)}% da renda`;
             document.getElementById('savings-pct').textContent = `${savingsPercent.toFixed(0)}% da renda`;
             setTimeout(() => {
@@ -260,20 +241,23 @@
                 document.getElementById('savings-bar').style.width = `${savingsPercent}%`;
             }, 300);
 
+            // Desenhar bolhas com as despesas por categoria
+            const expensesByCategory = data.expensesByCategory;
             const bubbleContainer = document.getElementById('bubble-container');
             const legendContainer = document.getElementById('bubble-legend');
             const noExpensesMsg = document.getElementById('no-expenses-message');
 
-            if (categoryMap.size === 0) {
+            if (Object.keys(expensesByCategory).length === 0 || data.totalExpenses === 0) {
                 bubbleContainer.classList.add('hidden');
                 noExpensesMsg.classList.remove('hidden');
                 legendContainer.innerHTML = '';
                 return;
             }
+
             bubbleContainer.classList.remove('hidden');
             noExpensesMsg.classList.add('hidden');
 
-            const sortedCategories = Array.from(categoryMap.entries()).sort((a, b) => b[1] - a[1]).slice(0, 7);
+            const sortedCategories = Object.entries(expensesByCategory);
             const maxValue = sortedCategories[0][1];
             bubbleContainer.innerHTML = '';
             legendContainer.innerHTML = '';
@@ -294,21 +278,22 @@
                 bubble.innerHTML = `<span style="color:white; font-size:${size>100?'0.8rem':'0.68rem'}; font-weight:700;">${escapeHtml(category)}</span><span style="color:rgba(255,255,255,0.9); font-size:${size>100?'0.72rem':'0.62rem'};">${formatter.format(amount)}</span>`;
                 bubbleContainer.appendChild(bubble);
 
-                const pct = (amount / totalExpenses) * 100;
+                const pct = (amount / data.totalExpenses) * 100;
                 const legendItem = document.createElement('div');
                 legendItem.className = 'flex items-center gap-1.5';
                 legendItem.innerHTML = `<span style="width:10px;height:10px;border-radius:50%;background:${color};"></span><span class="text-gray-600 dark:text-gray-300 text-[0.72rem]">${escapeHtml(category)} (${pct.toFixed(0)}%)</span>`;
                 legendContainer.appendChild(legendItem);
             });
-        } catch (e) {
-            console.error('Erro ao carregar transações/bolhas:', e);
-            document.getElementById('card-expenses').textContent = 'Erro ao carregar';
-            document.getElementById('card-savings').textContent = 'Erro ao carregar';
+        } catch (err) {
+            console.error('Erro ao carregar ciclo atual:', err);
+            document.getElementById('card-expenses').textContent = 'Erro';
+            document.getElementById('card-savings').textContent = 'Erro';
             document.getElementById('card-income-actual').textContent = 'Erro';
+            document.getElementById('current-cycle-label').textContent = 'Erro ao carregar ciclo';
         }
     }
 
-    // Carregar metas dinâmicas com suporte a dark mode
+    // Carregar metas dinâmicas (sem alteração)
     async function loadGoals() {
         try {
             const res = await fetch('/api/goals', { headers: { [csrfHeader]: csrfToken } });
@@ -350,10 +335,11 @@
         return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]);
     }
 
+    // Inicialização
     (async () => {
-        const monthlyIncome = await loadUserAndIncome();
-        await loadDashboardTransactions(monthlyIncome);
-        await loadGoals();
+        await loadUserData();     // carrega nome/avatar/renda mensal
+        await loadCycleData();    // carrega ciclo atual e atualiza cards/bolhas
+        await loadGoals();        // carrega metas
     })();
 </script>
 </body>
