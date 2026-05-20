@@ -37,10 +37,11 @@ public class AuthController {
 
         try {
             User user = User.builder()
-                    .email(userDTO.getEmail())
-                    .password(userDTO.getPassword())
-                    .theme("light")
-                    .build();
+                .email(userDTO.getEmail())
+                .password(userDTO.getPassword())
+                .theme("light")
+                .financialMonthDay(1)
+                .build();
             userService.register(user);
         } catch(IllegalArgumentException e){
             result.rejectValue("email", "error.user", "Este email já está em uso.");
