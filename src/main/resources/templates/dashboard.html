@@ -68,7 +68,6 @@
         .nav-item.active svg {
             stroke: white;
         }
-        /* Dark mode overrides para navegação */
         .dark .nav-item:hover {
             background-color: #334155;
             color: #60a5fa;
@@ -117,6 +116,10 @@
         <div>
             <h2 class="text-[1.5rem] font-bold text-[#1a1a2e] dark:text-white">Visão geral</h2>
             <p class="text-[0.85rem] text-[#666] dark:text-gray-400 mt-1" id="current-cycle-label">Carregando ciclo...</p>
+            <div class="flex items-center gap-2 mt-2">
+                <i data-lucide="sun" id="greeting-icon" class="w-5 h-5 text-[#1a1aff] dark:text-blue-400"></i>
+                <p id="user-greeting" class="text-[1rem] font-semibold text-[#1a1aff] dark:text-blue-400"></p>
+            </div>
         </div>
     </div>
 
@@ -151,7 +154,6 @@
 
     <!-- Grid 2 colunas: gastos + metas -->
     <div class="grid grid-cols-2 gap-5">
-        <!-- Distribuição dos gastos (bolhas) -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-gray-900/20">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-[1rem] font-bold text-[#1a1a2e] dark:text-white">Distribuição dos gastos</h3>
@@ -162,7 +164,6 @@
             <div id="no-expenses-message" class="text-center text-gray-500 dark:text-gray-400 py-8 hidden">Nenhuma despesa neste ciclo</div>
         </div>
 
-        <!-- Progresso das metas -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-gray-900/20">
             <div class="flex justify-between items-center mb-5">
                 <h3 class="text-[1rem] font-bold text-[#1a1a2e] dark:text-white">Progresso das metas</h3>
@@ -184,12 +185,31 @@
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
     const formatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
-    // Função para formatar data
     function formatDate(dateStr) {
         return new Date(dateStr).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
     }
 
-    // Carrega dados do usuário (avatar, nome, renda)
+    function getGreeting() {
+        const hour = new Date().getHours();
+        if (hour >= 5 && hour < 12) return "Bom dia";
+        if (hour >= 12 && hour < 18) return "Boa tarde";
+        return "Boa noite";
+    }
+
+    function updateGreeting(userName) {
+        const greetingElement = document.getElementById('user-greeting');
+        const iconElement = document.getElementById('greeting-icon');
+        if (greetingElement) {
+            const greeting = getGreeting();
+            greetingElement.textContent = `${greeting}, ${userName}!`;
+            // Atualiza ícone conforme o período
+            if (greeting === "Bom dia") iconElement.setAttribute('data-lucide', 'sun');
+            else if (greeting === "Boa tarde") iconElement.setAttribute('data-lucide', 'cloud-sun');
+            else iconElement.setAttribute('data-lucide', 'moon');
+            lucide.createIcons();
+        }
+    }
+
     async function loadUserData() {
         try {
             const res = await fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } });
@@ -205,6 +225,7 @@
                 avatarDiv.style.backgroundImage = '';
             }
             document.getElementById('user-email-display').textContent = user.name || user.email;
+            updateGreeting(user.name || user.email.split('@')[0] || user.email);
             document.getElementById('card-income').textContent = formatter.format(user.monthlyIncome || 0);
             return { monthlyIncome: user.monthlyIncome || 0 };
         } catch (e) {
@@ -214,23 +235,19 @@
         }
     }
 
-    // Carrega dados do ciclo atual do backend e atualiza todo o dashboard
     async function loadCycleData() {
         try {
             const res = await fetch('/api/transactions/current-cycle', { headers: { [csrfHeader]: csrfToken } });
             if (!res.ok) throw new Error('Erro ao carregar dados do ciclo');
             const data = await res.json();
 
-            // Atualiza label do ciclo
             const cycleLabel = document.getElementById('current-cycle-label');
             cycleLabel.innerHTML = `Ciclo: ${formatDate(data.cycleStart)} — ${formatDate(data.cycleEnd)}`;
 
-            // Atualiza cards de valores
             document.getElementById('card-income-actual').textContent = formatter.format(data.totalIncome);
             document.getElementById('card-expenses').textContent = formatter.format(data.totalExpenses);
             document.getElementById('card-savings').textContent = formatter.format(data.savings);
 
-            // Percentuais
             const monthlyIncome = parseFloat(document.getElementById('card-income').textContent.replace(/[^0-9,-]/g, '').replace(',', '.')) || 0;
             const expensesPercent = monthlyIncome > 0 ? (data.totalExpenses / monthlyIncome) * 100 : 0;
             const savingsPercent = monthlyIncome > 0 ? (data.savings / monthlyIncome) * 100 : 0;
@@ -241,7 +258,6 @@
                 document.getElementById('savings-bar').style.width = `${savingsPercent}%`;
             }, 300);
 
-            // Desenhar bolhas com as despesas por categoria
             const expensesByCategory = data.expensesByCategory;
             const bubbleContainer = document.getElementById('bubble-container');
             const legendContainer = document.getElementById('bubble-legend');
@@ -293,7 +309,6 @@
         }
     }
 
-    // Carregar metas dinâmicas (sem alteração)
     async function loadGoals() {
         try {
             const res = await fetch('/api/goals', { headers: { [csrfHeader]: csrfToken } });
@@ -335,11 +350,15 @@
         return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]);
     }
 
-    // Inicialização
     (async () => {
-        await loadUserData();     // carrega nome/avatar/renda mensal
-        await loadCycleData();    // carrega ciclo atual e atualiza cards/bolhas
-        await loadGoals();        // carrega metas
+        await loadUserData();
+        await loadCycleData();
+        await loadGoals();
+
+        setInterval(() => {
+            const userNameElem = document.getElementById('user-email-display');
+            if (userNameElem) updateGreeting(userNameElem.textContent);
+        }, 60000);
     })();
 </script>
 </body>
