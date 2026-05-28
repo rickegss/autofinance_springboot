@@ -178,7 +178,7 @@
                 if (isDark) htmlRoot.classList.add('dark');
                 else htmlRoot.classList.remove('dark');
             }
-        } catch(e) {}
+        } catch(e) { console.warn(e); }
     }
 
     function getCycleDates(paymentDay, refDate = new Date()) {
@@ -236,6 +236,7 @@
             }
             return { period: currentPeriod, paymentDay };
         } catch (e) {
+            console.error(e);
             return null;
         }
     }
@@ -327,7 +328,7 @@
     async function loadDashboardDataForPeriod(startDate, endDate) {
         try {
             const txRes = await fetch('/api/transactions', { headers: { [csrfHeader]: csrfToken } });
-            if (!txRes.ok) throw new Error();
+            if (!txRes.ok) throw new Error('Erro ao carregar transações');
             const transactions = await txRes.json();
             const periodTransactions = transactions.filter(t => {
                 const d = new Date(t.date);
@@ -364,7 +365,12 @@
             }, 300);
             
             drawBubbles(categoryMap, totalExpenses);
-        } catch (e) {}
+        } catch (e) {
+            console.error(e);
+            document.getElementById('card-expenses').textContent = 'Erro';
+            document.getElementById('card-savings').textContent = 'Erro';
+            document.getElementById('card-income-actual').textContent = 'Erro';
+        }
     }
 
     async function loadGoals() {
@@ -397,7 +403,9 @@
             });
             if (goals.length > 3) html += `<div class="text-center text-xs text-gray-400 dark:text-gray-500 mt-2">+ ${goals.length - 3} outras metas</div>`;
             container.innerHTML = html;
-        } catch (e) {}
+        } catch (e) {
+            document.getElementById('goals-container').innerHTML = '<div class="text-red-500 text-center">Erro ao carregar metas</div>';
+        }
     }
 
     function escapeHtml(str) {
