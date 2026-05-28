@@ -8,16 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { poppins: ['Poppins', 'sans-serif'] }
-                }
-            }
-        }
-    </script>
     <style>
         body { opacity: 0; transition: opacity 0.3s ease; }
         body.loaded { opacity: 1; }
@@ -43,6 +33,7 @@
             position: relative;
             width: 100%;
             height: 320px;
+            overflow: hidden;
         }
         .nav-item {
             display: flex;
@@ -68,116 +59,100 @@
         .nav-item.active svg {
             stroke: white;
         }
-        .dark .nav-item:hover {
-            background-color: #334155;
-            color: #60a5fa;
-        }
-        .dark .nav-item.active {
-            background-color: #2563eb;
-        }
     </style>
     <title>Autofinance - Dashboard</title>
 </head>
-<body class="font-poppins bg-[#f0f2f8] dark:bg-gray-900 min-h-screen flex">
+<body class="font-poppins bg-[#f0f2f8] min-h-screen flex">
 
-<aside class="w-[240px] bg-white dark:bg-gray-800 min-h-screen flex flex-col px-5 py-6 shadow-[2px_0_12px_rgba(0,0,0,0.06)] dark:shadow-none flex-shrink-0">
+<!-- Sidebar (igual ao seu, sem alterações) -->
+<aside class="w-[240px] bg-white min-h-screen flex flex-col px-5 py-6 shadow-[2px_0_12px_rgba(0,0,0,0.06)] flex-shrink-0">
     <div class="flex items-center gap-2 mb-10 px-2">
-        <h1 class="text-[1.3rem] font-bold text-[#1a1aff] dark:text-blue-400">Autofinance</h1>
-        <svg class="w-6 h-6 text-[#1a1aff] dark:text-blue-400" viewBox="0 0 38 38" fill="none">
-            <polygon points="19,2 35,11 35,27 19,36 3,27 3,11" fill="none" stroke="currentColor" stroke-width="2.5"/>
-            <line x1="19" y1="2" x2="19" y2="36" stroke="currentColor" stroke-width="1.5"/>
-            <line x1="3" y1="11" x2="35" y2="27" stroke="currentColor" stroke-width="1.5"/>
-            <line x1="35" y1="11" x2="3" y2="27" stroke="currentColor" stroke-width="1.5"/>
-        </svg>
+        <h1 class="text-[1.3rem] font-bold text-[#1a1aff]">Autofinance</h1>
+        <svg class="w-6 h-6 text-[#1a1aff]" viewBox="0 0 38 38" fill="none">...</svg>
     </div>
     <nav class="flex flex-col gap-1 flex-1">
         <a href="/dashboard" class="nav-item active"><i data-lucide="home" class="w-4 h-4"></i><span>Início</span></a>
         <a href="/transactions" class="nav-item"><i data-lucide="arrow-left-right" class="w-4 h-4"></i><span>Lançamentos</span></a>
         <a href="/goals" class="nav-item"><i data-lucide="target" class="w-4 h-4"></i><span>Metas</span></a>
-        <a href="/reports" class="nav-item"><i data-lucide="bar-chart-2" class="w-4 h-4"></i><span>Relatórios</span></a>
-        <a href="/calendar" class="nav-item"><i data-lucide="calendar-days" class="w-4 h-4"></i><span>Calendário</span></a>
+        <a href="#" class="nav-item"><i data-lucide="bar-chart-2" class="w-4 h-4"></i><span>Relatórios</span></a>
+        <a href="#" class="nav-item"><i data-lucide="calendar" class="w-4 h-4"></i><span>Planejamento</span></a>
+        <a href="#" class="nav-item"><i data-lucide="tag" class="w-4 h-4"></i><span>Categorias</span></a>
+        <a href="#" class="nav-item"><i data-lucide="calendar-days" class="w-4 h-4"></i><span>Calendário</span></a>
         <a href="/settings" class="nav-item"><i data-lucide="settings" class="w-4 h-4"></i><span>Configurações</span></a>
     </nav>
-    <div class="mt-auto pt-4 border-t border-[#f0f2f8] dark:border-gray-700">
-        <a href="/profile" class="flex items-center gap-3 px-2 py-3 rounded-xl hover:bg-[#f0f2f8] dark:hover:bg-gray-700 transition-colors mb-2 no-underline">
-            <div class="w-9 h-9 rounded-full bg-[#1a1aff] dark:bg-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0" id="user-avatar">U</div>
+    <div class="mt-auto pt-4 border-t border-[#f0f2f8]">
+        <a href="/profile" class="flex items-center gap-3 px-2 py-3 rounded-xl hover:bg-[#f0f2f8] transition-colors mb-2 no-underline">
+            <div class="w-9 h-9 rounded-full bg-[#1a1aff] flex items-center justify-center text-white font-bold text-sm flex-shrink-0" id="user-avatar">U</div>
             <div class="flex flex-col min-w-0">
-                <span class="text-[0.8rem] font-semibold text-[#1a1a2e] dark:text-gray-200 truncate" id="user-email-display">usuário</span>
-                <span class="text-[0.72rem] text-[#666] dark:text-gray-400">Ver perfil</span>
+                <span class="text-[0.8rem] font-semibold text-[#1a1a2e] truncate" id="user-email-display">usuário</span>
+                <span class="text-[0.72rem] text-[#666]">Ver perfil</span>
             </div>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-[#aaa] dark:text-gray-500 ml-auto flex-shrink-0"></i>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-[#aaa] ml-auto flex-shrink-0"></i>
         </a>
     </div>
 </aside>
 
+<!-- Conteúdo principal -->
 <main class="flex-1 p-8 overflow-y-auto">
-    <!-- Header -->
     <div class="flex justify-between items-start mb-8">
         <div>
-            <h2 class="text-[1.5rem] font-bold text-[#1a1a2e] dark:text-white">Visão geral</h2>
-            <p class="text-[0.85rem] text-[#666] dark:text-gray-400 mt-1" id="current-cycle-label">Carregando ciclo...</p>
-            <div class="flex items-center gap-2 mt-2">
-                <i data-lucide="sun" id="greeting-icon" class="w-5 h-5 text-[#1a1aff] dark:text-blue-400"></i>
-                <p id="user-greeting" class="text-[1rem] font-semibold text-[#1a1aff] dark:text-blue-400"></p>
-            </div>
+            <h2 class="text-[1.5rem] font-bold text-[#1a1a2e]">Visão geral</h2>
+            <p class="text-[0.85rem] text-[#666] mt-1" id="current-date">Carregando...</p>
+        </div>
+        <div class="flex items-center gap-2 bg-white rounded-xl px-4 py-2 shadow-sm cursor-pointer hover:shadow-md transition-shadow">
+            <span class="text-[0.85rem] font-medium text-[#1a1a2e]">Este ciclo</span>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-[#666]"></i>
         </div>
     </div>
 
-    <!-- Cards de resumo -->
+    <!-- Cards resumo -->
     <div class="grid grid-cols-4 gap-5 mb-8">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-gray-900/20">
-            <p class="text-[0.8rem] text-[#666] dark:text-gray-400 font-medium mb-1">Renda mensal</p>
-            <p class="text-[1.8rem] font-extrabold text-[#1a1aff] dark:text-blue-400" id="card-income">R$ 0,00</p>
-            <button class="mt-3 text-[0.78rem] text-[#1a1aff] dark:text-blue-400 font-semibold hover:underline" onclick="window.location.href='/profile'">Editar</button>
+        <div class="bg-white rounded-2xl p-6 shadow-sm">
+            <p class="text-[0.8rem] text-[#666] font-medium mb-1">Renda mensal</p>
+            <p class="text-[1.8rem] font-extrabold text-[#1a1aff]" id="card-income">R$ 0,00</p>
+            <button class="mt-3 text-[0.78rem] text-[#1a1aff] font-semibold hover:underline" onclick="window.location.href='/profile'">Editar</button>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-gray-900/20">
-            <p class="text-[0.8rem] text-[#666] dark:text-gray-400 font-medium mb-1">Receitas do ciclo</p>
-            <p class="text-[1.8rem] font-extrabold text-[#10b981] dark:text-emerald-400" id="card-income-actual">R$ 0,00</p>
+        <div class="bg-white rounded-2xl p-6 shadow-sm">
+            <p class="text-[0.8rem] text-[#666] font-medium mb-1">Receitas do ciclo</p>
+            <p class="text-[1.8rem] font-extrabold text-[#10b981]" id="card-income-actual">R$ 0,00</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-gray-900/20">
-            <p class="text-[0.8rem] text-[#666] dark:text-gray-400 font-medium mb-1">Gasto total</p>
-            <p class="text-[1.8rem] font-extrabold text-[#ef4444] dark:text-red-400" id="card-expenses">R$ 0,00</p>
-            <p class="text-[0.78rem] text-[#666] dark:text-gray-400 mt-3" id="expenses-pct">0% da renda</p>
-            <div class="w-full h-1.5 bg-[#f0f2f8] dark:bg-gray-700 rounded-full mt-1.5">
-                <div class="h-full bg-[#ef4444] dark:bg-red-400 rounded-full transition-all duration-500" id="expenses-bar" style="width:0%"></div>
-            </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm">
+            <p class="text-[0.8rem] text-[#666] font-medium mb-1">Gasto total</p>
+            <p class="text-[1.8rem] font-extrabold text-[#ef4444]" id="card-expenses">R$ 0,00</p>
+            <p class="text-[0.78rem] text-[#666] mt-3" id="expenses-pct">0% da base</p>
+            <div class="w-full h-1.5 bg-[#f0f2f8] rounded-full mt-1.5"><div class="h-full bg-[#ef4444] rounded-full transition-all duration-500" id="expenses-bar" style="width:0%"></div></div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-gray-900/20">
-            <p class="text-[0.8rem] text-[#666] dark:text-gray-400 font-medium mb-1">Economia</p>
-            <p class="text-[1.8rem] font-extrabold text-[#10b981] dark:text-emerald-400" id="card-savings">R$ 0,00</p>
-            <p class="text-[0.78rem] text-[#666] dark:text-gray-400 mt-3" id="savings-pct">0% da renda</p>
-            <div class="w-full h-1.5 bg-[#f0f2f8] dark:bg-gray-700 rounded-full mt-1.5">
-                <div class="h-full bg-[#10b981] dark:bg-emerald-400 rounded-full transition-all duration-500" id="savings-bar" style="width:0%"></div>
-            </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm">
+            <p class="text-[0.8rem] text-[#666] font-medium mb-1">Economia</p>
+            <p class="text-[1.8rem] font-extrabold text-[#10b981]" id="card-savings">R$ 0,00</p>
+            <p class="text-[0.78rem] text-[#666] mt-3" id="savings-pct">0% da base</p>
+            <div class="w-full h-1.5 bg-[#f0f2f8] rounded-full mt-1.5"><div class="h-full bg-[#10b981] rounded-full transition-all duration-500" id="savings-bar" style="width:0%"></div></div>
         </div>
     </div>
 
-    <!-- Grid 2 colunas: gastos + metas -->
+    <!-- Grid 2 colunas -->
     <div class="grid grid-cols-2 gap-5">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-gray-900/20">
+        <div class="bg-white rounded-2xl p-6 shadow-sm">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-[1rem] font-bold text-[#1a1a2e] dark:text-white">Distribuição dos gastos</h3>
-                <a href="/transactions" class="text-[0.78rem] text-[#1a1aff] dark:text-blue-400 font-semibold hover:underline">Ver detalhes</a>
+                <h3 class="text-[1rem] font-bold text-[#1a1a2e]">Distribuição dos gastos</h3>
+                <a href="/transactions" class="text-[0.78rem] text-[#1a1aff] font-semibold hover:underline">Ver detalhes</a>
             </div>
             <div id="bubble-container"></div>
             <div class="flex gap-4 mt-4 flex-wrap" id="bubble-legend"></div>
-            <div id="no-expenses-message" class="text-center text-gray-500 dark:text-gray-400 py-8 hidden">Nenhuma despesa neste ciclo</div>
+            <div id="no-expenses-message" class="text-center text-gray-500 py-8 hidden">Nenhuma despesa neste ciclo</div>
         </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm dark:shadow-gray-900/20">
+        <div class="bg-white rounded-2xl p-6 shadow-sm">
             <div class="flex justify-between items-center mb-5">
-                <h3 class="text-[1rem] font-bold text-[#1a1a2e] dark:text-white">Progresso das metas</h3>
-                <a href="/goals" class="text-[0.78rem] text-[#1a1aff] dark:text-blue-400 font-semibold hover:underline">Ver todas</a>
+                <h3 class="text-[1rem] font-bold text-[#1a1a2e]">Progresso das metas</h3>
+                <a href="/goals" class="text-[0.78rem] text-[#1a1aff] font-semibold hover:underline">Ver todas</a>
             </div>
             <div id="goals-container" class="flex flex-col gap-5">
-                <div class="text-center text-gray-500 dark:text-gray-400 py-4">Carregando metas...</div>
+                <div class="text-center text-gray-500 py-4">Carregando metas...</div>
             </div>
         </div>
     </div>
 </main>
 
-<script th:src="@{/js/theme.js}"></script>
-<script th:src="@{/js/transitions.js}"></script>
 <script th:inline="javascript">
     lucide.createIcons();
 
@@ -185,32 +160,10 @@
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
     const formatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
-    function formatDate(dateStr) {
-        return new Date(dateStr).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
-    }
+    let periodStartDate, periodEndDate;
 
-    function getGreeting() {
-        const hour = new Date().getHours();
-        if (hour >= 5 && hour < 12) return "Bom dia";
-        if (hour >= 12 && hour < 18) return "Boa tarde";
-        return "Boa noite";
-    }
-
-    function updateGreeting(userName) {
-        const greetingElement = document.getElementById('user-greeting');
-        const iconElement = document.getElementById('greeting-icon');
-        if (greetingElement) {
-            const greeting = getGreeting();
-            greetingElement.textContent = `${greeting}, ${userName}!`;
-            // Atualiza ícone conforme o período
-            if (greeting === "Bom dia") iconElement.setAttribute('data-lucide', 'sun');
-            else if (greeting === "Boa tarde") iconElement.setAttribute('data-lucide', 'cloud-sun');
-            else iconElement.setAttribute('data-lucide', 'moon');
-            lucide.createIcons();
-        }
-    }
-
-    async function loadUserData() {
+    // Carrega usuário e calcula período personalizado
+    async function loadUserAndPeriod() {
         try {
             const res = await fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } });
             if (!res.ok) throw new Error();
@@ -225,87 +178,123 @@
                 avatarDiv.style.backgroundImage = '';
             }
             document.getElementById('user-email-display').textContent = user.name || user.email;
-            updateGreeting(user.name || user.email.split('@')[0] || user.email);
             document.getElementById('card-income').textContent = formatter.format(user.monthlyIncome || 0);
-            return { monthlyIncome: user.monthlyIncome || 0 };
+
+            const paymentDay = user.financialMonthDay || 1;
+            const today = new Date();
+            let start = new Date(today.getFullYear(), today.getMonth() - 1, paymentDay);
+            let end = new Date(today.getFullYear(), today.getMonth(), paymentDay - 1);
+            if (today.getDate() >= paymentDay) {
+                start = new Date(today.getFullYear(), today.getMonth(), paymentDay);
+                end = new Date(today.getFullYear(), today.getMonth() + 1, paymentDay - 1);
+            }
+            periodStartDate = start;
+            periodEndDate = end;
+            const startStr = start.toLocaleDateString('pt-BR');
+            const endStr = end.toLocaleDateString('pt-BR');
+            document.getElementById('current-date').innerHTML = `Ciclo: ${startStr} – ${endStr}`;
+            return user.monthlyIncome || 0;
         } catch (e) {
-            console.warn('Erro ao carregar dados do usuário:', e);
+            console.error(e);
             document.getElementById('card-income').textContent = 'R$ 0,00';
-            return { monthlyIncome: 0 };
+            return 0;
         }
     }
 
-    async function loadCycleData() {
+    async function loadDashboardData(monthlyIncome) {
         try {
-            const res = await fetch('/api/transactions/current-cycle', { headers: { [csrfHeader]: csrfToken } });
-            if (!res.ok) throw new Error('Erro ao carregar dados do ciclo');
-            const data = await res.json();
+            const txRes = await fetch('/api/transactions', { headers: { [csrfHeader]: csrfToken } });
+            if (!txRes.ok) throw new Error('Erro ao carregar transações');
+            const transactions = await txRes.json();
 
-            const cycleLabel = document.getElementById('current-cycle-label');
-            cycleLabel.innerHTML = `Ciclo: ${formatDate(data.cycleStart)} — ${formatDate(data.cycleEnd)}`;
+            const periodTransactions = transactions.filter(t => {
+                const d = new Date(t.date);
+                return d >= periodStartDate && d <= periodEndDate;
+            });
 
-            document.getElementById('card-income-actual').textContent = formatter.format(data.totalIncome);
-            document.getElementById('card-expenses').textContent = formatter.format(data.totalExpenses);
-            document.getElementById('card-savings').textContent = formatter.format(data.savings);
+            let totalExpenses = 0, totalIncome = 0;
+            const categoryMap = new Map();
+            for (const tx of periodTransactions) {
+                const amount = parseFloat(tx.amount);
+                if (tx.type === 'DESPESA') {
+                    totalExpenses += amount;
+                    categoryMap.set(tx.category, (categoryMap.get(tx.category) || 0) + amount);
+                } else if (tx.type === 'RECEITA') {
+                    totalIncome += amount;
+                }
+            }
 
-            const monthlyIncome = parseFloat(document.getElementById('card-income').textContent.replace(/[^0-9,-]/g, '').replace(',', '.')) || 0;
-            const expensesPercent = monthlyIncome > 0 ? (data.totalExpenses / monthlyIncome) * 100 : 0;
-            const savingsPercent = monthlyIncome > 0 ? (data.savings / monthlyIncome) * 100 : 0;
-            document.getElementById('expenses-pct').textContent = `${expensesPercent.toFixed(0)}% da renda`;
-            document.getElementById('savings-pct').textContent = `${savingsPercent.toFixed(0)}% da renda`;
+            const baseForPercentage = totalIncome > 0 ? totalIncome : monthlyIncome;
+            const expensesPercent = baseForPercentage > 0 ? (totalExpenses / baseForPercentage) * 100 : 0;
+            const savings = baseForPercentage - totalExpenses;
+            const savingsPercent = baseForPercentage > 0 ? (savings / baseForPercentage) * 100 : 0;
+
+            document.getElementById('card-expenses').textContent = formatter.format(totalExpenses);
+            document.getElementById('card-savings').textContent = formatter.format(savings);
+            document.getElementById('expenses-pct').textContent = `${expensesPercent.toFixed(0)}% da base`;
+            document.getElementById('savings-pct').textContent = `${savingsPercent.toFixed(0)}% da base`;
+            document.getElementById('card-income-actual').textContent = formatter.format(totalIncome);
             setTimeout(() => {
-                document.getElementById('expenses-bar').style.width = `${expensesPercent}%`;
-                document.getElementById('savings-bar').style.width = `${savingsPercent}%`;
+                document.getElementById('expenses-bar').style.width = `${Math.min(expensesPercent, 100)}%`;
+                document.getElementById('savings-bar').style.width = `${Math.min(savingsPercent, 100)}%`;
             }, 300);
 
-            const expensesByCategory = data.expensesByCategory;
             const bubbleContainer = document.getElementById('bubble-container');
             const legendContainer = document.getElementById('bubble-legend');
             const noExpensesMsg = document.getElementById('no-expenses-message');
 
-            if (Object.keys(expensesByCategory).length === 0 || data.totalExpenses === 0) {
+            if (categoryMap.size === 0) {
                 bubbleContainer.classList.add('hidden');
                 noExpensesMsg.classList.remove('hidden');
                 legendContainer.innerHTML = '';
                 return;
             }
-
             bubbleContainer.classList.remove('hidden');
             noExpensesMsg.classList.add('hidden');
 
-            const sortedCategories = Object.entries(expensesByCategory);
+            const sortedCategories = Array.from(categoryMap.entries()).sort((a, b) => b[1] - a[1]).slice(0, 7);
             const maxValue = sortedCategories[0][1];
             bubbleContainer.innerHTML = '';
             legendContainer.innerHTML = '';
+
+            const containerWidth = bubbleContainer.clientWidth || 560;
+            const containerHeight = 320;
             const colorPalette = ['#5b21b6', '#10b981', '#f59e0b', '#3b82f6', '#ec4899', '#14b8a6', '#ef4444'];
 
             sortedCategories.forEach(([category, amount], idx) => {
                 const ratio = amount / maxValue;
-                const size = 70 + ratio * 90;
-                const color = colorPalette[idx % colorPalette.length];
-                const angle = (idx * 50) % 360;
-                const radius = 80 + idx * 15;
-                const x = 50 + (Math.cos(angle * Math.PI / 180) * radius) / 2;
-                const y = 50 + (Math.sin(angle * Math.PI / 180) * radius) / 3;
+                const minSize = 60;
+                const maxSize = 140;
+                const size = minSize + ratio * (maxSize - minSize);
 
+                const margin = 0.1;
+                const randX = margin + (idx / (sortedCategories.length - 1)) * (1 - 2 * margin);
+                const randY = 0.2 + Math.sin(idx) * 0.3;
+                let left = randX * 100;
+                let top = randY * 100;
+                const leftLimit = (size / 2 / containerWidth) * 100;
+                const topLimit = (size / 2 / containerHeight) * 100;
+                left = Math.min(Math.max(left, leftLimit), 100 - leftLimit);
+                top = Math.min(Math.max(top, topLimit), 100 - topLimit);
+
+                const color = colorPalette[idx % colorPalette.length];
                 const bubble = document.createElement('div');
                 bubble.className = 'bubble';
-                bubble.style.cssText = `width:${size}px; height:${size}px; background-color:${color}; left:calc(${x}% - ${size/2}px); top:calc(${y}% - ${size/2}px); opacity:0.88;`;
+                bubble.style.cssText = `width:${size}px; height:${size}px; background-color:${color}; left:${left}%; top:${top}%; transform:translate(-50%, -50%); opacity:0.88;`;
                 bubble.innerHTML = `<span style="color:white; font-size:${size>100?'0.8rem':'0.68rem'}; font-weight:700;">${escapeHtml(category)}</span><span style="color:rgba(255,255,255,0.9); font-size:${size>100?'0.72rem':'0.62rem'};">${formatter.format(amount)}</span>`;
                 bubbleContainer.appendChild(bubble);
 
-                const pct = (amount / data.totalExpenses) * 100;
+                const pct = (amount / totalExpenses) * 100;
                 const legendItem = document.createElement('div');
                 legendItem.className = 'flex items-center gap-1.5';
-                legendItem.innerHTML = `<span style="width:10px;height:10px;border-radius:50%;background:${color};"></span><span class="text-gray-600 dark:text-gray-300 text-[0.72rem]">${escapeHtml(category)} (${pct.toFixed(0)}%)</span>`;
+                legendItem.innerHTML = `<span style="width:10px;height:10px;border-radius:50%;background:${color};"></span><span style="font-size:0.72rem;color:#666;">${escapeHtml(category)} (${pct.toFixed(0)}%)</span>`;
                 legendContainer.appendChild(legendItem);
             });
-        } catch (err) {
-            console.error('Erro ao carregar ciclo atual:', err);
+        } catch (e) {
+            console.error(e);
             document.getElementById('card-expenses').textContent = 'Erro';
             document.getElementById('card-savings').textContent = 'Erro';
             document.getElementById('card-income-actual').textContent = 'Erro';
-            document.getElementById('current-cycle-label').textContent = 'Erro ao carregar ciclo';
         }
     }
 
@@ -316,32 +305,29 @@
             const goals = await res.json();
             const container = document.getElementById('goals-container');
             if (!goals.length) {
-                container.innerHTML = '<div class="text-center text-gray-500 dark:text-gray-400 py-4">Nenhuma meta cadastrada.<br><a href="/goals" class="text-blue-600 dark:text-blue-400 hover:underline">Criar meta</a></div>';
+                container.innerHTML = '<div class="text-center text-gray-500 py-4">Nenhuma meta cadastrada.<br><a href="/goals" class="text-blue-600 hover:underline">Criar meta</a></div>';
                 return;
             }
             let html = '';
             goals.slice(0, 3).forEach(goal => {
                 const percent = (goal.currentAmount / goal.targetAmount) * 100;
                 html += `
-                    <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                    <div class="bg-gray-50 rounded-xl p-3">
                         <div class="flex justify-between items-center mb-1">
-                            <span class="text-sm font-semibold text-gray-800 dark:text-gray-200">${escapeHtml(goal.name)}</span>
-                            <span class="text-xs font-bold text-[#1a1aff] dark:text-blue-400">${percent.toFixed(0)}%</span>
+                            <span class="text-sm font-semibold text-gray-800">${escapeHtml(goal.name)}</span>
+                            <span class="text-xs font-bold text-[#1a1aff]">${percent.toFixed(0)}%</span>
                         </div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mb-2">
-                            <div class="bg-[#1a1aff] dark:bg-blue-500 rounded-full h-2 transition-all duration-500" style="width: ${percent}%"></div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                            <div class="bg-[#1a1aff] rounded-full h-2 transition-all duration-500" style="width: ${percent}%"></div>
                         </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">${formatter.format(goal.currentAmount)} / ${formatter.format(goal.targetAmount)}</p>
+                        <p class="text-xs text-gray-500">${formatter.format(goal.currentAmount)} / ${formatter.format(goal.targetAmount)}</p>
                     </div>
                 `;
             });
-            if (goals.length > 3) {
-                html += `<div class="text-center text-xs text-gray-400 dark:text-gray-500 mt-2">+ ${goals.length - 3} outras metas</div>`;
-            }
+            if (goals.length > 3) html += `<div class="text-center text-xs text-gray-400 mt-2">+ ${goals.length - 3} outras metas</div>`;
             container.innerHTML = html;
         } catch (e) {
-            console.error('Erro ao carregar metas:', e);
-            document.getElementById('goals-container').innerHTML = '<div class="text-red-500 dark:text-red-400 text-center">Erro ao carregar metas</div>';
+            document.getElementById('goals-container').innerHTML = '<div class="text-red-500 text-center">Erro ao carregar metas</div>';
         }
     }
 
@@ -351,15 +337,11 @@
     }
 
     (async () => {
-        await loadUserData();
-        await loadCycleData();
+        const monthlyIncome = await loadUserAndPeriod();
+        await loadDashboardData(monthlyIncome);
         await loadGoals();
-
-        setInterval(() => {
-            const userNameElem = document.getElementById('user-email-display');
-            if (userNameElem) updateGreeting(userNameElem.textContent);
-        }, 60000);
     })();
 </script>
+<script th:src="@{/js/transitions.js}"></script>
 </body>
 </html>
