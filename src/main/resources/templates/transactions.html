@@ -197,10 +197,29 @@
 <script th:inline="javascript">
     lucide.createIcons();
 
-    function formatLocalDate(dateString) {
-        if (!dateString) return '-';
-        const [year, month, day] = dateString.split('-');
-        return `${day}/${month}/${year}`;
+    function formatLocalDate(dateValue) {
+        if (!dateValue) return '-';
+        
+        if (typeof dateValue === 'string' && dateValue.match(/^\d{4}-\d{2}-\d{2}/)) {
+            const [year, month, day] = dateValue.split('-');
+            return `${day}/${month}/${year}`;
+        }
+        
+        if (dateValue instanceof Date && !isNaN(dateValue)) {
+            const year = dateValue.getFullYear();
+            const month = String(dateValue.getMonth() + 1).padStart(2, '0');
+            const day = String(dateValue.getDate()).padStart(2, '0');
+            return `${day}/${month}/${year}`;
+        }
+        
+        const str = String(dateValue);
+        const parts = str.match(/(\d{4})-(\d{2})-(\d{2})/);
+        if (parts) {
+            return `${parts[3]}/${parts[2]}/${parts[1]}`;
+        }
+        
+        console.warn('Formato de data não reconhecido:', dateValue);
+        return '-';
     }
 
     const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
