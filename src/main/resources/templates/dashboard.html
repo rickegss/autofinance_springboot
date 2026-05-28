@@ -289,22 +289,18 @@
             
             let placed = false;
             let currentOverlap = 1.0;
-            let searchRadius = 0;
+            let currentPadding = 12;
             
-            while (!placed && currentOverlap >= 0) {
-                for (let attempt = 0; attempt < 100; attempt++) {
-                    const rDist = Math.random() * searchRadius;
-                    const angle = Math.random() * Math.PI * 2;
-                    let x = containerWidth / 2 + Math.cos(angle) * rDist;
-                    let y = containerHeight / 2 + Math.sin(angle) * rDist;
-                    
-                    x = Math.max(radius, Math.min(containerWidth - radius, x));
-                    y = Math.max(radius, Math.min(containerHeight - radius, y));
+            while (!placed && currentOverlap > 0.2) {
+                for (let attempt = 0; attempt < 200; attempt++) {
+                    const x = radius + Math.random() * (containerWidth - size);
+                    const y = radius + Math.random() * (containerHeight - size);
                     
                     let collision = false;
                     for (let b of bubbles) {
                         const dist = Math.hypot(b.x - x, b.y - y);
-                        if (dist < (b.r + radius) * currentOverlap) {
+                        const requiredDist = (b.r + radius) * currentOverlap + currentPadding;
+                        if (dist < requiredDist) {
                             collision = true;
                             break;
                         }
@@ -316,13 +312,17 @@
                         break;
                     }
                 }
-                currentOverlap -= 0.05;
-                searchRadius += 10;
+                
+                currentPadding -= 3;
+                if (currentPadding < 0) {
+                    currentOverlap -= 0.1;
+                    currentPadding = 0;
+                }
             }
             
             if (!placed) {
-                const safeX = Math.max(radius, Math.min(containerWidth - radius, containerWidth / 2));
-                const safeY = Math.max(radius, Math.min(containerHeight - radius, containerHeight / 2));
+                const safeX = Math.max(radius, Math.min(containerWidth - radius, containerWidth / 2 + (Math.random() * 40 - 20)));
+                const safeY = Math.max(radius, Math.min(containerHeight - radius, containerHeight / 2 + (Math.random() * 40 - 20)));
                 bubbles.push({ x: safeX, y: safeY, r: radius, category, amount, size, color: colorPalette[idx % colorPalette.length] });
             }
         }
@@ -426,6 +426,7 @@
             if (goals.length > 3) html += `<div class="text-center text-xs text-gray-400 dark:text-gray-500 mt-2">+ ${goals.length - 3} outras metas</div>`;
             container.innerHTML = html;
         } catch (e) {
+            console.error(e);
             document.getElementById('goals-container').innerHTML = '<div class="text-red-500 text-center">Erro ao carregar metas</div>';
         }
     }
