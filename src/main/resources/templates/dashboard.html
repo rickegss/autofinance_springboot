@@ -182,11 +182,11 @@
     }
 
     function getCycleDates(paymentDay, refDate = new Date()) {
-        let start = new Date(refDate.getFullYear(), refDate.getMonth() - 1, paymentDay);
-        let end = new Date(refDate.getFullYear(), refDate.getMonth(), paymentDay - 1);
+        let start = new Date(refDate.getFullYear(), refDate.getMonth() - 1, paymentDay, 0, 0, 0);
+        let end = new Date(refDate.getFullYear(), refDate.getMonth(), paymentDay - 1, 23, 59, 59);
         if (refDate.getDate() >= paymentDay) {
-            start = new Date(refDate.getFullYear(), refDate.getMonth(), paymentDay);
-            end = new Date(refDate.getFullYear(), refDate.getMonth() + 1, paymentDay - 1);
+            start = new Date(refDate.getFullYear(), refDate.getMonth(), paymentDay, 0, 0, 0);
+            end = new Date(refDate.getFullYear(), refDate.getMonth() + 1, paymentDay - 1, 23, 59, 59);
         }
         return { start, end };
     }
@@ -217,24 +217,34 @@
             document.getElementById('card-income').textContent = formatter.format(user.monthlyIncome || 0);
             userMonthlyIncome = user.monthlyIncome || 0;
             const paymentDay = user.financialMonthDay || 1;
-            const today = new Date();
-            const currentPeriod = getCycleDates(paymentDay, today);
-            
-            document.getElementById('current-date').innerHTML = `Ciclo: ${formatCycleLabel(currentPeriod.start, currentPeriod.end)}`;
             
             const selector = document.getElementById('cycleSelector');
             selector.innerHTML = '';
+            
+            let currentRef = new Date();
+            let initialStart, initialEnd;
+
             for (let i = 0; i <= 5; i++) {
-                const ref = new Date(today.getFullYear(), today.getMonth() - i, 1);
-                const { start, end } = getCycleDates(paymentDay, ref);
+                const { start, end } = getCycleDates(paymentDay, currentRef);
+                
+                if (i === 0) {
+                    initialStart = start;
+                    initialEnd = end;
+                }
+                
                 const label = `( ${formatCycleLabel(start, end).toLowerCase()} )`;
                 const option = document.createElement('option');
                 option.value = `${start.toISOString()}|${end.toISOString()}`;
                 option.textContent = i === 0 ? `Ciclo atual ${label}` : label;
                 if (i === 0) option.selected = true;
                 selector.appendChild(option);
+                
+                currentRef = new Date(start.getFullYear(), start.getMonth(), start.getDate() - 5);
             }
-            return { period: currentPeriod, paymentDay };
+            
+            document.getElementById('current-date').innerHTML = `Ciclo: ${formatCycleLabel(initialStart, initialEnd)}`;
+            
+            return { start: initialStart, end: initialEnd, paymentDay };
         } catch (e) {
             console.error(e);
             return null;
@@ -261,8 +271,13 @@
         
         const containerWidth = container.clientWidth || 560;
         const containerHeight = 320;
-        const maxBubbleSize = Math.max(90, 280 - (entries.length * 20));
-        const minBubbleSize = Math.max(50, maxBubbleSize * 0.35);
+        const containerArea = containerWidth * containerHeight;
+        
+        const idealAreaPerBubble = (containerArea * 0.5) / entries.length;
+        const dynamicBaseSize = Math.sqrt(idealAreaPerBubble / Math.PI) * 2;
+        
+        const maxBubbleSize = Math.min(180, Math.max(45, dynamicBaseSize));
+        const minBubbleSize = Math.max(30, maxBubbleSize * 0.4);
         
         let bubbles = [];
         
@@ -273,17 +288,23 @@
             const radius = size / 2;
             
             let placed = false;
-            let overlapFactor = 1.0;
+            let currentOverlap = 1.0;
+            let searchRadius = 0;
             
-            while (!placed && overlapFactor > 0.0) {
-                for (let attempt = 0; attempt < 60; attempt++) {
-                    const x = Math.random() * (containerWidth - size) + radius;
-                    const y = Math.random() * (containerHeight - size) + radius;
+            while (!placed && currentOverlap >= 0) {
+                for (let attempt = 0; attempt < 100; attempt++) {
+                    const rDist = Math.random() * searchRadius;
+                    const angle = Math.random() * Math.PI * 2;
+                    let x = containerWidth / 2 + Math.cos(angle) * rDist;
+                    let y = containerHeight / 2 + Math.sin(angle) * rDist;
+                    
+                    x = Math.max(radius, Math.min(containerWidth - radius, x));
+                    y = Math.max(radius, Math.min(containerHeight - radius, y));
                     
                     let collision = false;
                     for (let b of bubbles) {
                         const dist = Math.hypot(b.x - x, b.y - y);
-                        if (dist < (b.r + radius) * overlapFactor) {
+                        if (dist < (b.r + radius) * currentOverlap) {
                             collision = true;
                             break;
                         }
@@ -295,13 +316,14 @@
                         break;
                     }
                 }
-                overlapFactor -= 0.15;
+                currentOverlap -= 0.05;
+                searchRadius += 10;
             }
             
             if (!placed) {
-                const x = containerWidth / 2;
-                const y = containerHeight / 2;
-                bubbles.push({ x, y, r: radius, category, amount, size, color: colorPalette[idx % colorPalette.length] });
+                const safeX = Math.max(radius, Math.min(containerWidth - radius, containerWidth / 2));
+                const safeY = Math.max(radius, Math.min(containerHeight - radius, containerHeight / 2));
+                bubbles.push({ x: safeX, y: safeY, r: radius, category, amount, size, color: colorPalette[idx % colorPalette.length] });
             }
         }
         
@@ -413,13 +435,12 @@
         return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]);
     }
 
-    document.addEventListener('DOMContentLoaded', async () => {
+    (async () => {
         await loadTheme();
         const init = await loadUserAndInit();
         if (!init) return;
-        const { period } = init;
         
-        await loadDashboardDataForPeriod(period.start, period.end);
+        await loadDashboardDataForPeriod(init.start, init.end);
         await loadGoals();
         
         const selector = document.getElementById('cycleSelector');
@@ -430,9 +451,7 @@
             document.getElementById('current-date').innerHTML = `Ciclo: ${formatCycleLabel(newStart, newEnd)}`;
             await loadDashboardDataForPeriod(newStart, newEnd);
         });
-        
-        document.body.classList.add('loaded');
-    });
+    })();
 </script>
 <script th:src="@{/js/transitions.js}"></script>
 </body>
