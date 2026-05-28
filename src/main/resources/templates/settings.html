@@ -44,7 +44,6 @@
         .nav-item.active svg {
             stroke: white;
         }
-        /* Ajustes para dark mode nos ícones da sidebar */
         .dark .nav-item:hover {
             background-color: #334155;
         }
@@ -56,7 +55,7 @@
 </head>
 <body class="font-poppins bg-[#f0f2f8] dark:bg-gray-900 min-h-screen flex">
 
-<!-- Sidebar igual ao dashboard -->
+<!-- Sidebar -->
 <aside class="w-[240px] bg-white dark:bg-gray-800 min-h-screen flex flex-col px-5 py-6 shadow-[2px_0_12px_rgba(0,0,0,0.06)] flex-shrink-0">
     <div class="flex items-center gap-2 mb-10 px-2">
         <h1 class="text-[1.3rem] font-bold text-[#1a1aff] dark:text-blue-400">Autofinance</h1>
@@ -69,27 +68,12 @@
     </div>
 
     <nav class="flex flex-col gap-1 flex-1">
-        <a href="/dashboard" class="nav-item">
-            <i data-lucide="home" class="w-4 h-4"></i>
-            <span>Painel</span>
-        </a>
-        <a href="/transactions" class="nav-item">
-            <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
-            <span>Lançamentos</span>
-        </a>
-        <a href="/goals" class="nav-item">
-            <i data-lucide="target" class="w-4 h-4"></i>
-            <span>Metas</span>
-        </a>
-        <a href="/reports" class="nav-item">
-            <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
-            <span>Relatórios</span>
-        </a>
+        <a href="/dashboard" class="nav-item"><i data-lucide="home" class="w-4 h-4"></i><span>Painel</span></a>
+        <a href="/transactions" class="nav-item"><i data-lucide="arrow-left-right" class="w-4 h-4"></i><span>Lançamentos</span></a>
+        <a href="/goals" class="nav-item"><i data-lucide="target" class="w-4 h-4"></i><span>Metas</span></a>
+        <a href="/reports" class="nav-item"><i data-lucide="bar-chart-2" class="w-4 h-4"></i><span>Relatórios</span></a>
         <a href="/calendar" class="nav-item"><i data-lucide="calendar-days" class="w-4 h-4"></i><span>Calendário</span></a>
-        <a href="/settings" class="nav-item active">
-            <i data-lucide="settings" class="w-4 h-4"></i>
-            <span>Configurações</span>
-        </a>
+        <a href="/settings" class="nav-item active"><i data-lucide="settings" class="w-4 h-4"></i><span>Configurações</span></a>
     </nav>
 
     <div class="mt-auto pt-4 border-t border-[#f0f2f8] dark:border-gray-700">
@@ -109,32 +93,46 @@
     <div class="max-w-3xl mx-auto">
         <h2 class="text-2xl font-bold text-[#1a1a2e] dark:text-white mb-6">Configurações</h2>
 
+        <!-- Seção: Aparência -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 mb-8">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Aparência</h3>
-
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <i data-lucide="moon" class="w-5 h-5 text-gray-700 dark:text-gray-300"></i>
                     <span class="text-gray-700 dark:text-gray-300 font-medium">Modo escuro</span>
                 </div>
-
-                <!-- Toggle switch -->
                 <div id="themeToggle" class="relative inline-flex items-center cursor-pointer" onclick="toggleTheme()">
                     <div class="w-11 h-6 bg-gray-200 dark:bg-blue-600 rounded-full transition-colors duration-200"></div>
                     <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-200 dark:translate-x-5"></div>
                 </div>
             </div>
-
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">
-                O tema é salvo no seu perfil e sincronizado entre todos os seus dispositivos.
-            </p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">O tema é salvo no seu perfil e sincronizado entre todos os seus dispositivos.</p>
         </div>
 
-        <!-- Outras configurações futuras podem ser adicionadas aqui -->
+        <!-- Seção: Dia do recebimento -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 mb-8">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Período financeiro</h3>
+            <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Dia do mês que você recebe seu principal rendimento:
+                    </label>
+                    <select id="paymentDaySelect" class="w-full sm:w-40 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        <!-- Opções preenchidas via JS -->
+                    </select>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                        Essa informação define o início do seu ciclo financeiro (ex: se você recebe dia 10, o período vai de 10/05 a 09/06).
+                    </p>
+                </div>
+                <button id="savePaymentDayBtn" class="bg-[#1a1aff] text-white px-5 py-2 rounded-xl hover:bg-[#0f0fcc] transition flex items-center gap-2">
+                    <i data-lucide="save" class="w-4 h-4"></i>
+                    Salvar
+                </button>
+            </div>
+        </div>
     </div>
 </main>
 
-<!-- Scripts: primeiro theme.js, depois transições e dados do usuário -->
 <script th:src="@{/js/theme.js}"></script>
 <script th:src="@{/js/transitions.js}"></script>
 <script th:inline="javascript">
@@ -143,6 +141,53 @@
     const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
+    // Preencher select com dias 1 a 31
+    const select = document.getElementById('paymentDaySelect');
+    for (let i = 1; i <= 31; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = i;
+        select.appendChild(option);
+    }
+
+    // Carregar o dia salvo via /api/user/me
+    async function loadPaymentDay() {
+        try {
+            const res = await fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } });
+            if (res.ok) {
+                const user = await res.json();
+                const day = user.financialMonthDay || 1;
+                select.value = day;
+            } else {
+                select.value = 1;
+            }
+        } catch (e) {
+            console.warn(e);
+            select.value = 1;
+        }
+    }
+
+    // Salvar o dia selecionado
+    async function savePaymentDay() {
+        const day = parseInt(select.value);
+        try {
+            const res = await fetch(`/api/user/financial-month-day?day=${day}`, {
+                method: 'PUT',
+                headers: { [csrfHeader]: csrfToken }
+            });
+            if (res.ok) {
+                alert('Preferência salva com sucesso!');
+            } else {
+                alert('Erro ao salvar. Tente novamente.');
+            }
+        } catch (e) {
+            alert('Erro de conexão.');
+        }
+    }
+
+    document.getElementById('savePaymentDayBtn').addEventListener('click', savePaymentDay);
+
+    // Carregar dados do usuário (avatar, nome)
     async function loadUserData() {
         try {
             const res = await fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } });
@@ -165,6 +210,7 @@
     }
 
     loadUserData();
+    loadPaymentDay();
 </script>
 </body>
 </html>
