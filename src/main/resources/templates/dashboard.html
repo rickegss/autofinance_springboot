@@ -114,7 +114,7 @@
             <p class="text-[0.85rem] text-[#666] dark:text-gray-400 mt-1" id="current-date">Carregando...</p>
         </div>
         <select id="cycleSelector" class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="current">Ciclo atual</option>
+            <option value="">Carregando ciclos...</option>
         </select>
     </div>
 
@@ -177,7 +177,46 @@
 
     let userMonthlyIncome = 0;
 
-    // Carrega tema (modo escuro)
+    // --- Funções auxiliares ---
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]);
+    }
+
+    function getMonthName(date) {
+        const months = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+                        'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+        return months[date.getUTCMonth()];
+    }
+
+    function formatCycleLabel(start, end) {
+        const startMonth = getMonthName(start);
+        const endMonth = getMonthName(end);
+        if (startMonth === endMonth) return startMonth;
+        return `${startMonth} – ${endMonth}`;
+    }
+
+    // Converte data para UTC sem hora (meia-noite)
+    function toUTCMidnight(date) {
+        return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    }
+
+    // --- Cálculo do ciclo baseado no dia de pagamento ---
+    function getCycleDates(paymentDay, refDate = new Date()) {
+        // refDate em UTC midnight para consistência
+        const ref = toUTCMidnight(refDate);
+        let start, end;
+        if (ref.getUTCDate() >= paymentDay) {
+            start = new Date(Date.UTC(ref.getUTCFullYear(), ref.getUTCMonth(), paymentDay));
+            end = new Date(Date.UTC(ref.getUTCFullYear(), ref.getUTCMonth() + 1, paymentDay - 1));
+        } else {
+            start = new Date(Date.UTC(ref.getUTCFullYear(), ref.getUTCMonth() - 1, paymentDay));
+            end = new Date(Date.UTC(ref.getUTCFullYear(), ref.getUTCMonth(), paymentDay - 1));
+        }
+        return { start, end };
+    }
+
+    // --- Carrega tema e dados do usuário, popula seletor de ciclos ---
     async function loadTheme() {
         try {
             const res = await fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } });
@@ -191,22 +230,10 @@
         } catch(e) { console.warn(e); }
     }
 
-    // Calcula início e fim do ciclo baseado no dia de pagamento
-    function getCycleDates(paymentDay, refDate = new Date()) {
-        let start = new Date(refDate.getFullYear(), refDate.getMonth() - 1, paymentDay);
-        let end = new Date(refDate.getFullYear(), refDate.getMonth(), paymentDay - 1);
-        if (refDate.getDate() >= paymentDay) {
-            start = new Date(refDate.getFullYear(), refDate.getMonth(), paymentDay);
-            end = new Date(refDate.getFullYear(), refDate.getMonth() + 1, paymentDay - 1);
-        }
-        return { start, end };
-    }
-
-    // Carrega dados do usuário, sidebar, seletor de ciclos e retorna o período atual
     async function loadUserAndInit() {
         try {
             const res = await fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } });
-            if (!res.ok) throw new Error();
+            if (!res.ok) throw new Error('Erro ao carregar usuário');
             const user = await res.json();
             // Avatar e nome
             const avatarDiv = document.getElementById('user-avatar');
@@ -225,15 +252,17 @@
             const paymentDay = user.financialMonthDay || 1;
             const today = new Date();
             const currentPeriod = getCycleDates(paymentDay, today);
-            document.getElementById('current-date').innerHTML = `Ciclo: ${currentPeriod.start.toLocaleDateString('pt-BR')} – ${currentPeriod.end.toLocaleDateString('pt-BR')}`;
 
-            // Preencher seletor de ciclos (últimos 6)
+            // Formatar texto do ciclo atual
+            document.getElementById('current-date').innerHTML = `Ciclo: ${formatCycleLabel(currentPeriod.start, currentPeriod.end)}`;
+
+            // Preencher seletor com os últimos 6 ciclos (formato com nomes de meses)
             const selector = document.getElementById('cycleSelector');
             selector.innerHTML = '';
             for (let i = 0; i <= 5; i++) {
                 const ref = new Date(today.getFullYear(), today.getMonth() - i, 1);
                 const { start, end } = getCycleDates(paymentDay, ref);
-                const label = `${start.toLocaleDateString('pt-BR')} – ${end.toLocaleDateString('pt-BR')}`;
+                const label = formatCycleLabel(start, end);
                 const option = document.createElement('option');
                 option.value = `${start.toISOString()}|${end.toISOString()}`;
                 option.textContent = label;
@@ -247,13 +276,14 @@
         }
     }
 
-    // Desenha bolhas com colisão e tamanho dinâmico
+    // --- Desenho das bolhas (nova versão: sem colisão, tamanho inversamente proporcional à quantidade) ---
     function drawBubbles(categoryMap, totalExpenses) {
         const container = document.getElementById('bubble-container');
         const legendDiv = document.getElementById('bubble-legend');
         const noExpensesMsg = document.getElementById('no-expenses-message');
 
         if (categoryMap.size === 0) {
+            container.innerHTML = '';
             container.classList.add('hidden');
             noExpensesMsg.classList.remove('hidden');
             legendDiv.innerHTML = '';
@@ -264,65 +294,48 @@
 
         const entries = Array.from(categoryMap.entries()).sort((a,b) => b[1] - a[1]);
         const maxValue = entries[0][1];
+        const qtd = entries.length;
+        // Fator de escala global: inversamente proporcional à raiz quadrada da quantidade
+        // Quanto menos bolhas, maior o fator (ex: com 2 bolhas fica ~2x maior, com 32 fica ~0.5x)
+        const REF_QTY = 8;
+        let globalScale = Math.sqrt(REF_QTY / qtd);
+        globalScale = Math.min(1.6, Math.max(0.5, globalScale)); // limites para não ficar muito grande/pequeno
+
         const colorPalette = ['#5b21b6', '#10b981', '#f59e0b', '#3b82f6', '#ec4899', '#14b8a6', '#ef4444', '#8b5cf6', '#f97316', '#06b6d4'];
 
-        // Calcula tamanho base (menor se houver muitas categorias)
-        const baseSize = Math.min(140, Math.max(60, 200 / Math.sqrt(entries.length)));
-        let bubbles = [];
-
+        // Dimensões do container
         const containerWidth = container.clientWidth || 560;
         const containerHeight = 320;
+        const centerX = containerWidth / 2;
+        const centerY = containerHeight / 2;
+        // Raio máximo de dispersão (distâncias curtas)
+        const maxSpread = Math.min(containerWidth, containerHeight) * 0.28; // ~ 90px para 320px
 
-        function collision(x, y, r, existing) {
-            for (let b of existing) {
-                const dx = b.x - x, dy = b.y - y;
-                const dist = Math.hypot(dx, dy);
-                if (dist < b.r + r + 8) return true; // distância mínima de 8px
-            }
-            return false;
-        }
+        const bubbles = [];
 
         for (let idx = 0; idx < entries.length; idx++) {
             const [category, amount] = entries[idx];
             const ratio = amount / maxValue;
-            let size = baseSize * (0.7 + ratio * 0.6);
-            size = Math.min(140, Math.max(50, size));
-            const radius = size / 2;
+            // Tamanho base proporcional ao valor (entre 40 e 110)
+            let baseDiameter = 40 + ratio * 70;
+            let finalDiameter = baseDiameter * globalScale;
+            finalDiameter = Math.min(150, Math.max(35, finalDiameter));
+            const radius = finalDiameter / 2;
 
-            let placed = false;
-            for (let attempt = 0; attempt < 200; attempt++) {
-                const x = Math.random() * (containerWidth - size) + radius;
-                const y = Math.random() * (containerHeight - size) + radius;
-                if (!collision(x, y, radius, bubbles)) {
-                    bubbles.push({ x, y, r: radius, category, amount, size, color: colorPalette[idx % colorPalette.length] });
-                    placed = true;
-                    break;
-                }
-            }
-            if (!placed) {
-                // Se não couber, reduz o tamanho gradativamente
-                let newSize = size;
-                while (newSize > 30) {
-                    newSize -= 5;
-                    const newRadius = newSize / 2;
-                    for (let attempt2 = 0; attempt2 < 100; attempt2++) {
-                        const x = Math.random() * (containerWidth - newSize) + newRadius;
-                        const y = Math.random() * (containerHeight - newSize) + newRadius;
-                        if (!collision(x, y, newRadius, bubbles)) {
-                            bubbles.push({ x, y, r: newRadius, category, amount, size: newSize, color: colorPalette[idx % colorPalette.length] });
-                            placed = true;
-                            break;
-                        }
-                    }
-                    if (placed) break;
-                }
-                if (!placed) {
-                    // Último recurso: posiciona em qualquer lugar sem colisão (mas provavelmente vai sobrepor)
-                    const x = Math.random() * (containerWidth - size) + radius;
-                    const y = Math.random() * (containerHeight - size) + radius;
-                    bubbles.push({ x, y, r: radius, category, amount, size, color: colorPalette[idx % colorPalette.length] });
-                }
-            }
+            // Posicionamento aleatório com distância curta do centro
+            const angle = Math.random() * 2 * Math.PI;
+            const distance = Math.random() * maxSpread;
+            let x = centerX + Math.cos(angle) * distance;
+            let y = centerY + Math.sin(angle) * distance;
+
+            // Garantir que a bolha não ultrapasse as bordas
+            x = Math.min(containerWidth - radius, Math.max(radius, x));
+            y = Math.min(containerHeight - radius, Math.max(radius, y));
+
+            bubbles.push({
+                x, y, radius, finalDiameter, category, amount,
+                color: colorPalette[idx % colorPalette.length]
+            });
         }
 
         // Renderizar bolhas
@@ -330,8 +343,9 @@
         bubbles.forEach(b => {
             const bubble = document.createElement('div');
             bubble.className = 'bubble';
-            bubble.style.cssText = `width:${b.size}px; height:${b.size}px; background-color:${b.color}; left:${b.x - b.r}px; top:${b.y - b.r}px; opacity:0.88;`;
-            bubble.innerHTML = `<span style="color:white; font-size:${b.size>100?'0.8rem':'0.68rem'}; font-weight:700;">${escapeHtml(b.category)}</span><span style="color:rgba(255,255,255,0.9); font-size:${b.size>100?'0.72rem':'0.62rem'};">${formatter.format(b.amount)}</span>`;
+            bubble.style.cssText = `width:${b.finalDiameter}px; height:${b.finalDiameter}px; background-color:${b.color}; left:${b.x - b.radius}px; top:${b.y - b.radius}px; opacity:0.88;`;
+            const fontSizeValue = b.finalDiameter > 100 ? '0.8rem' : (b.finalDiameter > 70 ? '0.7rem' : '0.6rem');
+            bubble.innerHTML = `<span style="color:white; font-size:${fontSizeValue}; font-weight:700;">${escapeHtml(b.category)}</span><span style="color:rgba(255,255,255,0.9); font-size:${parseFloat(fontSizeValue)-0.1}rem;">${formatter.format(b.amount)}</span>`;
             container.appendChild(bubble);
         });
 
@@ -347,16 +361,24 @@
         });
     }
 
-    // Carrega transações e atualiza cards, bolhas e porcentagens
+    // --- Carrega transações e atualiza todos os cards e bolhas para um período ---
     async function loadDashboardDataForPeriod(startDate, endDate) {
         try {
+            // Normalizar as datas para comparação (somente ano-mês-dia em UTC)
+            const startNorm = toUTCMidnight(startDate);
+            const endNorm = toUTCMidnight(endDate);
+            // Adiciona um dia ao final para incluir todo o último dia
+            const endNextDay = new Date(endNorm);
+            endNextDay.setUTCDate(endNorm.getUTCDate() + 1);
+
             const txRes = await fetch('/api/transactions', { headers: { [csrfHeader]: csrfToken } });
             if (!txRes.ok) throw new Error('Erro ao carregar transações');
             const transactions = await txRes.json();
 
             const periodTransactions = transactions.filter(t => {
-                const d = new Date(t.date);
-                return d >= startDate && d <= endDate;
+                const txDate = new Date(t.date);
+                const txNorm = toUTCMidnight(txDate);
+                return txNorm >= startNorm && txNorm < endNextDay;
             });
 
             let totalExpenses = 0, totalIncome = 0;
@@ -384,7 +406,7 @@
             setTimeout(() => {
                 document.getElementById('expenses-bar').style.width = `${Math.min(expensesPercent, 100)}%`;
                 document.getElementById('savings-bar').style.width = `${Math.min(savingsPercent, 100)}%`;
-            }, 300);
+            }, 100);
 
             drawBubbles(categoryMap, totalExpenses);
         } catch (e) {
@@ -428,26 +450,25 @@
         }
     }
 
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]);
-    }
-
-    // Inicialização
+    // --- Inicialização principal ---
     (async () => {
         await loadTheme();
         const init = await loadUserAndInit();
         if (!init) return;
         const { period } = init;
+
+        // Carrega dados do período atual
         await loadDashboardDataForPeriod(period.start, period.end);
         await loadGoals();
 
+        // Evento de troca de ciclo no seletor
         const selector = document.getElementById('cycleSelector');
         selector.addEventListener('change', async (e) => {
             const [startIso, endIso] = e.target.value.split('|');
             const newStart = new Date(startIso);
             const newEnd = new Date(endIso);
-            document.getElementById('current-date').innerHTML = `Ciclo: ${newStart.toLocaleDateString('pt-BR')} – ${newEnd.toLocaleDateString('pt-BR')}`;
+            // Atualiza o texto do ciclo
+            document.getElementById('current-date').innerHTML = `Ciclo: ${formatCycleLabel(newStart, newEnd)}`;
             await loadDashboardDataForPeriod(newStart, newEnd);
         });
     })();
