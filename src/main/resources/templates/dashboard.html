@@ -59,7 +59,6 @@
         .nav-item.active svg {
             stroke: white;
         }
-        /* Dark mode overrides */
         .dark .nav-item:hover {
             background-color: #334155;
         }
@@ -114,28 +113,23 @@
             <h2 class="text-[1.5rem] font-bold text-[#1a1a2e] dark:text-white">Visão geral</h2>
             <p class="text-[0.85rem] text-[#666] dark:text-gray-400 mt-1" id="current-date">Carregando...</p>
         </div>
-        <!-- Seletor de ciclo -->
-        <div class="relative">
-            <select id="cycleSelector" class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="current">Ciclo atual</option>
-                <!-- As opções de meses anteriores serão preenchidas via JS -->
-            </select>
-        </div>
+        <select id="cycleSelector" class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="current">Ciclo atual</option>
+        </select>
     </div>
 
-    <!-- Cards resumo -->
     <div class="grid grid-cols-4 gap-5 mb-8">
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-            <p class="text-[0.8rem] text-[#666] dark:text-gray-400 font-medium mb-1">Renda mensal</p>
+            <p class="text-[0.8rem] text-[#666] dark:text-gray-400 font-medium mb-1">Renda mensal (fixa)</p>
             <p class="text-[1.8rem] font-extrabold text-[#1a1aff] dark:text-blue-400" id="card-income">R$ 0,00</p>
             <button class="mt-3 text-[0.78rem] text-[#1a1aff] font-semibold hover:underline" onclick="window.location.href='/profile'">Editar</button>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-            <p class="text-[0.8rem] text-[#666] dark:text-gray-400 font-medium mb-1">Receitas do ciclo</p>
+            <p class="text-[0.8rem] text-[#666] dark:text-gray-400 font-medium mb-1">Receitas totais (ciclo)</p>
             <p class="text-[1.8rem] font-extrabold text-[#10b981]" id="card-income-actual">R$ 0,00</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-            <p class="text-[0.8rem] text-[#666] dark:text-gray-400 font-medium mb-1">Gasto total</p>
+            <p class="text-[0.8rem] text-[#666] dark:text-gray-400 font-medium mb-1">Gastos totais</p>
             <p class="text-[1.8rem] font-extrabold text-[#ef4444]" id="card-expenses">R$ 0,00</p>
             <p class="text-[0.78rem] text-[#666] dark:text-gray-400 mt-3" id="expenses-pct">0% da base</p>
             <div class="w-full h-1.5 bg-[#f0f2f8] dark:bg-gray-700 rounded-full mt-1.5">
@@ -143,7 +137,7 @@
             </div>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-            <p class="text-[0.8rem] text-[#666] dark:text-gray-400 font-medium mb-1">Economia</p>
+            <p class="text-[0.8rem] text-[#666] dark:text-gray-400 font-medium mb-1">Economia (lucro)</p>
             <p class="text-[1.8rem] font-extrabold text-[#10b981]" id="card-savings">R$ 0,00</p>
             <p class="text-[0.78rem] text-[#666] dark:text-gray-400 mt-3" id="savings-pct">0% da base</p>
             <div class="w-full h-1.5 bg-[#f0f2f8] dark:bg-gray-700 rounded-full mt-1.5">
@@ -181,10 +175,9 @@
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
     const formatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
-    let currentPeriod = { start: null, end: null, label: 'current' };
     let userMonthlyIncome = 0;
 
-    // Carrega tema do usuário e aplica dark mode
+    // Carrega tema (modo escuro)
     async function loadTheme() {
         try {
             const res = await fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } });
@@ -192,33 +185,30 @@
                 const user = await res.json();
                 const isDark = user.theme === 'dark';
                 const htmlRoot = document.getElementById('htmlRoot');
-                if (isDark) {
-                    htmlRoot.classList.add('dark');
-                } else {
-                    htmlRoot.classList.remove('dark');
-                }
-                // Sincroniza o toggle do settings (se existir)
-                const toggleBtn = document.getElementById('themeToggle');
-                if (toggleBtn) {
-                    const circle = toggleBtn.querySelector('.absolute');
-                    if (isDark) {
-                        toggleBtn.classList.add('dark');
-                        circle?.classList.add('translate-x-5');
-                    } else {
-                        toggleBtn.classList.remove('dark');
-                        circle?.classList.remove('translate-x-5');
-                    }
-                }
+                if (isDark) htmlRoot.classList.add('dark');
+                else htmlRoot.classList.remove('dark');
             }
-        } catch (e) { console.warn(e); }
+        } catch(e) { console.warn(e); }
     }
 
-    // Carrega dados do usuário e calcula período padrão (ciclo atual)
-    async function loadUserAndPeriod() {
+    // Calcula início e fim do ciclo baseado no dia de pagamento
+    function getCycleDates(paymentDay, refDate = new Date()) {
+        let start = new Date(refDate.getFullYear(), refDate.getMonth() - 1, paymentDay);
+        let end = new Date(refDate.getFullYear(), refDate.getMonth(), paymentDay - 1);
+        if (refDate.getDate() >= paymentDay) {
+            start = new Date(refDate.getFullYear(), refDate.getMonth(), paymentDay);
+            end = new Date(refDate.getFullYear(), refDate.getMonth() + 1, paymentDay - 1);
+        }
+        return { start, end };
+    }
+
+    // Carrega dados do usuário, sidebar, seletor de ciclos e retorna o período atual
+    async function loadUserAndInit() {
         try {
             const res = await fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } });
             if (!res.ok) throw new Error();
             const user = await res.json();
+            // Avatar e nome
             const avatarDiv = document.getElementById('user-avatar');
             if (user.avatarBase64) {
                 avatarDiv.style.backgroundImage = `url(data:image/jpeg;base64,${user.avatarBase64})`;
@@ -231,43 +221,133 @@
             document.getElementById('user-email-display').textContent = user.name || user.email;
             document.getElementById('card-income').textContent = formatter.format(user.monthlyIncome || 0);
             userMonthlyIncome = user.monthlyIncome || 0;
-            return user;
+
+            const paymentDay = user.financialMonthDay || 1;
+            const today = new Date();
+            const currentPeriod = getCycleDates(paymentDay, today);
+            document.getElementById('current-date').innerHTML = `Ciclo: ${currentPeriod.start.toLocaleDateString('pt-BR')} – ${currentPeriod.end.toLocaleDateString('pt-BR')}`;
+
+            // Preencher seletor de ciclos (últimos 6)
+            const selector = document.getElementById('cycleSelector');
+            selector.innerHTML = '';
+            for (let i = 0; i <= 5; i++) {
+                const ref = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                const { start, end } = getCycleDates(paymentDay, ref);
+                const label = `${start.toLocaleDateString('pt-BR')} – ${end.toLocaleDateString('pt-BR')}`;
+                const option = document.createElement('option');
+                option.value = `${start.toISOString()}|${end.toISOString()}`;
+                option.textContent = label;
+                if (i === 0) option.selected = true;
+                selector.appendChild(option);
+            }
+            return { period: currentPeriod, paymentDay };
         } catch (e) {
             console.error(e);
-            document.getElementById('card-income').textContent = 'R$ 0,00';
-            return { monthlyIncome: 0, financialMonthDay: 1 };
+            return null;
         }
     }
 
-    // Calcula as datas de início e fim de um ciclo com base no dia de pagamento e em uma data de referência (mês/ano)
-    function getCycleDates(paymentDay, refDate = new Date()) {
-        let start = new Date(refDate.getFullYear(), refDate.getMonth() - 1, paymentDay);
-        let end = new Date(refDate.getFullYear(), refDate.getMonth(), paymentDay - 1);
-        if (refDate.getDate() >= paymentDay) {
-            start = new Date(refDate.getFullYear(), refDate.getMonth(), paymentDay);
-            end = new Date(refDate.getFullYear(), refDate.getMonth() + 1, paymentDay - 1);
+    // Desenha bolhas com colisão e tamanho dinâmico
+    function drawBubbles(categoryMap, totalExpenses) {
+        const container = document.getElementById('bubble-container');
+        const legendDiv = document.getElementById('bubble-legend');
+        const noExpensesMsg = document.getElementById('no-expenses-message');
+
+        if (categoryMap.size === 0) {
+            container.classList.add('hidden');
+            noExpensesMsg.classList.remove('hidden');
+            legendDiv.innerHTML = '';
+            return;
         }
-        return { start, end };
+        container.classList.remove('hidden');
+        noExpensesMsg.classList.add('hidden');
+
+        const entries = Array.from(categoryMap.entries()).sort((a,b) => b[1] - a[1]);
+        const maxValue = entries[0][1];
+        const colorPalette = ['#5b21b6', '#10b981', '#f59e0b', '#3b82f6', '#ec4899', '#14b8a6', '#ef4444', '#8b5cf6', '#f97316', '#06b6d4'];
+
+        // Calcula tamanho base (menor se houver muitas categorias)
+        const baseSize = Math.min(140, Math.max(60, 200 / Math.sqrt(entries.length)));
+        let bubbles = [];
+
+        const containerWidth = container.clientWidth || 560;
+        const containerHeight = 320;
+
+        function collision(x, y, r, existing) {
+            for (let b of existing) {
+                const dx = b.x - x, dy = b.y - y;
+                const dist = Math.hypot(dx, dy);
+                if (dist < b.r + r + 8) return true; // distância mínima de 8px
+            }
+            return false;
+        }
+
+        for (let idx = 0; idx < entries.length; idx++) {
+            const [category, amount] = entries[idx];
+            const ratio = amount / maxValue;
+            let size = baseSize * (0.7 + ratio * 0.6);
+            size = Math.min(140, Math.max(50, size));
+            const radius = size / 2;
+
+            let placed = false;
+            for (let attempt = 0; attempt < 200; attempt++) {
+                const x = Math.random() * (containerWidth - size) + radius;
+                const y = Math.random() * (containerHeight - size) + radius;
+                if (!collision(x, y, radius, bubbles)) {
+                    bubbles.push({ x, y, r: radius, category, amount, size, color: colorPalette[idx % colorPalette.length] });
+                    placed = true;
+                    break;
+                }
+            }
+            if (!placed) {
+                // Se não couber, reduz o tamanho gradativamente
+                let newSize = size;
+                while (newSize > 30) {
+                    newSize -= 5;
+                    const newRadius = newSize / 2;
+                    for (let attempt2 = 0; attempt2 < 100; attempt2++) {
+                        const x = Math.random() * (containerWidth - newSize) + newRadius;
+                        const y = Math.random() * (containerHeight - newSize) + newRadius;
+                        if (!collision(x, y, newRadius, bubbles)) {
+                            bubbles.push({ x, y, r: newRadius, category, amount, size: newSize, color: colorPalette[idx % colorPalette.length] });
+                            placed = true;
+                            break;
+                        }
+                    }
+                    if (placed) break;
+                }
+                if (!placed) {
+                    // Último recurso: posiciona em qualquer lugar sem colisão (mas provavelmente vai sobrepor)
+                    const x = Math.random() * (containerWidth - size) + radius;
+                    const y = Math.random() * (containerHeight - size) + radius;
+                    bubbles.push({ x, y, r: radius, category, amount, size, color: colorPalette[idx % colorPalette.length] });
+                }
+            }
+        }
+
+        // Renderizar bolhas
+        container.innerHTML = '';
+        bubbles.forEach(b => {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.style.cssText = `width:${b.size}px; height:${b.size}px; background-color:${b.color}; left:${b.x - b.r}px; top:${b.y - b.r}px; opacity:0.88;`;
+            bubble.innerHTML = `<span style="color:white; font-size:${b.size>100?'0.8rem':'0.68rem'}; font-weight:700;">${escapeHtml(b.category)}</span><span style="color:rgba(255,255,255,0.9); font-size:${b.size>100?'0.72rem':'0.62rem'};">${formatter.format(b.amount)}</span>`;
+            container.appendChild(bubble);
+        });
+
+        // Legenda
+        legendDiv.innerHTML = '';
+        entries.forEach(([category, amount], i) => {
+            const pct = (amount / totalExpenses) * 100;
+            const color = colorPalette[i % colorPalette.length];
+            const legendItem = document.createElement('div');
+            legendItem.className = 'flex items-center gap-1.5';
+            legendItem.innerHTML = `<span style="width:10px;height:10px;border-radius:50%;background:${color};display:inline-block;"></span><span style="font-size:0.72rem;color:#666;dark:text-gray-400;">${escapeHtml(category)} (${pct.toFixed(0)}%)</span>`;
+            legendDiv.appendChild(legendItem);
+        });
     }
 
-    // Preenche o seletor com os últimos 6 ciclos (incluindo o atual)
-    function populateCycleSelector(paymentDay, currentRefDate) {
-        const selector = document.getElementById('cycleSelector');
-        selector.innerHTML = '';
-        for (let i = 0; i <= 5; i++) {
-            const ref = new Date(currentRefDate.getFullYear(), currentRefDate.getMonth() - i, 1);
-            const { start, end } = getCycleDates(paymentDay, ref);
-            const label = `${start.toLocaleDateString('pt-BR')} – ${end.toLocaleDateString('pt-BR')}`;
-            const option = document.createElement('option');
-            option.value = `${start.toISOString()}|${end.toISOString()}`;
-            option.textContent = label;
-            if (i === 0) option.selected = true;
-            selector.appendChild(option);
-        }
-        // Adiciona opção "Ciclo atual" (já incluído como i=0, mas para clareza)
-    }
-
-    // Carrega os dados do dashboard para um período específico (start e end)
+    // Carrega transações e atualiza cards, bolhas e porcentagens
     async function loadDashboardDataForPeriod(startDate, endDate) {
         try {
             const txRes = await fetch('/api/transactions', { headers: { [csrfHeader]: csrfToken } });
@@ -291,10 +371,10 @@
                 }
             }
 
-            const baseForPercentage = totalIncome > 0 ? totalIncome : userMonthlyIncome;
-            const expensesPercent = baseForPercentage > 0 ? (totalExpenses / baseForPercentage) * 100 : 0;
-            const savings = baseForPercentage - totalExpenses;
-            const savingsPercent = baseForPercentage > 0 ? (savings / baseForPercentage) * 100 : 0;
+            const base = totalIncome > 0 ? totalIncome : userMonthlyIncome;
+            const expensesPercent = base > 0 ? (totalExpenses / base) * 100 : 0;
+            const savings = base - totalExpenses;
+            const savingsPercent = base > 0 ? (savings / base) * 100 : 0;
 
             document.getElementById('card-expenses').textContent = formatter.format(totalExpenses);
             document.getElementById('card-savings').textContent = formatter.format(savings);
@@ -306,55 +386,7 @@
                 document.getElementById('savings-bar').style.width = `${Math.min(savingsPercent, 100)}%`;
             }, 300);
 
-            const bubbleContainer = document.getElementById('bubble-container');
-            const legendContainer = document.getElementById('bubble-legend');
-            const noExpensesMsg = document.getElementById('no-expenses-message');
-
-            if (categoryMap.size === 0) {
-                bubbleContainer.classList.add('hidden');
-                noExpensesMsg.classList.remove('hidden');
-                legendContainer.innerHTML = '';
-                return;
-            }
-            bubbleContainer.classList.remove('hidden');
-            noExpensesMsg.classList.add('hidden');
-
-            const sortedCategories = Array.from(categoryMap.entries()).sort((a, b) => b[1] - a[1]).slice(0, 7);
-            const maxValue = sortedCategories[0][1];
-            bubbleContainer.innerHTML = '';
-            legendContainer.innerHTML = '';
-
-            const containerWidth = bubbleContainer.clientWidth || 560;
-            const containerHeight = 320;
-            const colorPalette = ['#5b21b6', '#10b981', '#f59e0b', '#3b82f6', '#ec4899', '#14b8a6', '#ef4444'];
-
-            sortedCategories.forEach(([category, amount], idx) => {
-                const ratio = amount / maxValue;
-                const minSize = 60;
-                const maxSize = 140;
-                const size = minSize + ratio * (maxSize - minSize);
-
-                // Posição aleatória segura
-                let left = Math.random() * 80 + 10;  // 10% a 90%
-                let top = Math.random() * 70 + 15;    // 15% a 85%
-                const halfSizePercent = (size / 2 / containerWidth) * 100;
-                left = Math.min(Math.max(left, halfSizePercent), 100 - halfSizePercent);
-                const halfSizeHeightPercent = (size / 2 / containerHeight) * 100;
-                top = Math.min(Math.max(top, halfSizeHeightPercent), 100 - halfSizeHeightPercent);
-
-                const color = colorPalette[idx % colorPalette.length];
-                const bubble = document.createElement('div');
-                bubble.className = 'bubble';
-                bubble.style.cssText = `width:${size}px; height:${size}px; background-color:${color}; left:${left}%; top:${top}%; transform:translate(-50%, -50%); opacity:0.88;`;
-                bubble.innerHTML = `<span style="color:white; font-size:${size>100?'0.8rem':'0.68rem'}; font-weight:700;">${escapeHtml(category)}</span><span style="color:rgba(255,255,255,0.9); font-size:${size>100?'0.72rem':'0.62rem'};">${formatter.format(amount)}</span>`;
-                bubbleContainer.appendChild(bubble);
-
-                const pct = (amount / totalExpenses) * 100;
-                const legendItem = document.createElement('div');
-                legendItem.className = 'flex items-center gap-1.5';
-                legendItem.innerHTML = `<span style="width:10px;height:10px;border-radius:50%;background:${color};"></span><span style="font-size:0.72rem;color:#666; dark:text-gray-400;">${escapeHtml(category)} (${pct.toFixed(0)}%)</span>`;
-                legendContainer.appendChild(legendItem);
-            });
+            drawBubbles(categoryMap, totalExpenses);
         } catch (e) {
             console.error(e);
             document.getElementById('card-expenses').textContent = 'Erro';
@@ -404,19 +436,14 @@
     // Inicialização
     (async () => {
         await loadTheme();
-        const user = await loadUserAndPeriod();
-        const paymentDay = user.financialMonthDay || 1;
-        const today = new Date();
-        const { start, end } = getCycleDates(paymentDay, today);
-        currentPeriod.start = start;
-        currentPeriod.end = end;
-        document.getElementById('current-date').innerHTML = `Ciclo: ${start.toLocaleDateString('pt-BR')} – ${end.toLocaleDateString('pt-BR')}`;
-        populateCycleSelector(paymentDay, today);
-        await loadDashboardDataForPeriod(start, end);
+        const init = await loadUserAndInit();
+        if (!init) return;
+        const { period } = init;
+        await loadDashboardDataForPeriod(period.start, period.end);
         await loadGoals();
 
-        // Evento do seletor de ciclos
-        document.getElementById('cycleSelector').addEventListener('change', async (e) => {
+        const selector = document.getElementById('cycleSelector');
+        selector.addEventListener('change', async (e) => {
             const [startIso, endIso] = e.target.value.split('|');
             const newStart = new Date(startIso);
             const newEnd = new Date(endIso);
