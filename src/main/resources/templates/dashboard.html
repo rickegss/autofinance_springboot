@@ -370,7 +370,7 @@
                 }
             }
             
-            const base = totalIncome > 0 ? totalIncome : userMonthlyIncome;
+            const base = userMonthlyIncome + totalIncome;
             const expensesPercent = base > 0 ? (totalExpenses / base) * 100 : 0;
             const savings = base - totalExpenses;
             const savingsPercent = base > 0 ? (savings / base) * 100 : 0;
