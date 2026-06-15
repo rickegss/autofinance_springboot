@@ -183,6 +183,7 @@ public class TransactionController {
 
     private TransactionDTO convertToDTO(Transaction t) {
         return new TransactionDTO(
+                t.getId(),
                 t.getDescription(),
                 t.getAmount(),
                 t.getType(),
