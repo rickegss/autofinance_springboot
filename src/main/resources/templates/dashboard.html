@@ -389,52 +389,52 @@
     }
 
     async function loadDashboardDataForPeriod(startDate, endDate) {
-        try {
-            const txRes = await fetch('/api/transactions', { headers: { [csrfHeader]: csrfToken } });
-            if (!txRes.ok) throw new Error('Erro ao carregar transações');
-            const transactions = await txRes.json();
-            const periodTransactions = transactions.filter(t => {
-                const d = new Date(t.date);
-                return d >= startDate && d <= endDate;
-            });
-            
-            let totalExpenses = 0, totalIncome = 0;
-            const categoryMap = new Map();
-            
-            for (const tx of periodTransactions) {
-                const amount = parseFloat(tx.amount);
-                if (tx.type === 'DESPESA') {
-                    totalExpenses += amount;
-                    categoryMap.set(tx.category, (categoryMap.get(tx.category) || 0) + amount);
-                } else if (tx.type === 'RECEITA') {
-                    totalIncome += amount;
-                }
+    try {
+        const txRes = await fetch('/api/transactions', { headers: { [csrfHeader]: csrfToken } });
+        if (!txRes.ok) throw new Error('Erro ao carregar transações');
+        const transactions = await txRes.json();
+        const periodTransactions = transactions.filter(t => {
+            const d = new Date(t.date);
+            return d >= startDate && d <= endDate;
+        });
+        
+        let totalExpenses = 0, totalIncome = 0;
+        const categoryMap = new Map();
+        
+        for (const tx of periodTransactions) {
+            const amount = parseFloat(tx.amount);
+            if (tx.type === 'DESPESA') {
+                totalExpenses += amount;
+                categoryMap.set(tx.category, (categoryMap.get(tx.category) || 0) + amount);
+            } else if (tx.type === 'RECEITA') {
+                totalIncome += amount;
             }
-            
-            const base = userMonthlyIncome + totalIncome;
-            const expensesPercent = base > 0 ? (totalExpenses / base) * 100 : 0;
-            const savings = base - totalExpenses;
-            const savingsPercent = base > 0 ? (savings / base) * 100 : 0;
-            
-            document.getElementById('card-expenses').textContent = formatter.format(totalExpenses);
-            document.getElementById('card-savings').textContent = formatter.format(savings);
-            document.getElementById('expenses-pct').textContent = `${expensesPercent.toFixed(0)}% da base`;
-            document.getElementById('savings-pct').textContent = `${savingsPercent.toFixed(0)}% da base`;
-            document.getElementById('card-income-actual').textContent = formatter.format(totalIncome);
-            
-            setTimeout(() => {
-                document.getElementById('expenses-bar').style.width = `${Math.min(expensesPercent, 100)}%`;
-                document.getElementById('savings-bar').style.width = `${Math.min(savingsPercent, 100)}%`;
-            }, 300);
-            
-            drawBubbles(categoryMap, totalExpenses);
-        } catch (e) {
-            console.error(e);
-            document.getElementById('card-expenses').textContent = 'Erro';
-            document.getElementById('card-savings').textContent = 'Erro';
-            document.getElementById('card-income-actual').textContent = 'Erro';
         }
+        
+        const base = Number(userMonthlyIncome) + Number(totalIncome);
+        const expensesPercent = base > 0 ? (totalExpenses / base) * 100 : 0;
+        const savings = base - totalExpenses;
+        const savingsPercent = base > 0 ? (savings / base) * 100 : 0;
+        
+        document.getElementById('card-expenses').textContent = formatter.format(totalExpenses);
+        document.getElementById('card-savings').textContent = formatter.format(savings);
+        document.getElementById('expenses-pct').textContent = `${expensesPercent.toFixed(0)}% da base`;
+        document.getElementById('savings-pct').textContent = `${savingsPercent.toFixed(0)}% da base`;
+        document.getElementById('card-income-actual').textContent = formatter.format(totalIncome);
+        
+        setTimeout(() => {
+            document.getElementById('expenses-bar').style.width = `${Math.min(expensesPercent, 100)}%`;
+            document.getElementById('savings-bar').style.width = `${Math.min(savingsPercent, 100)}%`;
+        }, 300);
+        
+        drawBubbles(categoryMap, totalExpenses);
+    } catch (e) {
+        console.error(e);
+        document.getElementById('card-expenses').textContent = 'Erro';
+        document.getElementById('card-savings').textContent = 'Erro';
+        document.getElementById('card-income-actual').textContent = 'Erro';
     }
+}
 
     async function loadGoals() {
         try {
