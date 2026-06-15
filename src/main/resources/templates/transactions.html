@@ -44,13 +44,36 @@
         .nav-item.active svg {
             stroke: white;
         }
-        /* Dark mode overrides */
         .dark .nav-item:hover {
             background-color: #334155;
             color: #60a5fa;
         }
         .dark .nav-item.active {
             background-color: #2563eb;
+        }
+        .filter-input {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-family: 'Poppins', sans-serif;
+            background: white;
+            color: #1a1a2e;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+        .filter-input:focus {
+            border-color: #1a1aff;
+            box-shadow: 0 0 0 3px rgba(26,26,255,0.08);
+        }
+        .dark .filter-input {
+            background: #1e293b;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+        .dark .filter-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
         }
     </style>
     <title>Autofinance - Lançamentos</title>
@@ -120,6 +143,37 @@
     </div>
 
     <div id="messageDiv" class="hidden mb-4 p-3 rounded-lg text-sm"></div>
+
+    <!-- Filtros -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm px-5 py-4 mb-4 flex flex-wrap gap-3 items-end">
+        <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Categoria</label>
+            <select id="filterCategory" class="filter-input min-w-[160px]">
+                <option value="">Todas</option>
+            </select>
+        </div>
+        <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Tipo</label>
+            <select id="filterType" class="filter-input min-w-[130px]">
+                <option value="">Todos</option>
+                <option value="RECEITA">Receita</option>
+                <option value="DESPESA">Despesa</option>
+            </select>
+        </div>
+        <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">De</label>
+            <input type="date" id="filterDateFrom" class="filter-input">
+        </div>
+        <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Até</label>
+            <input type="date" id="filterDateTo" class="filter-input">
+        </div>
+        <button id="clearFiltersBtn" class="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition self-end">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            Limpar
+        </button>
+        <span id="filterCount" class="text-xs text-gray-400 dark:text-gray-500 self-end pb-2 ml-auto hidden"></span>
+    </div>
 
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -197,29 +251,35 @@
 <script th:inline="javascript">
     lucide.createIcons();
 
-    function formatLocalDate(dateValue) {
-        if (!dateValue) return '-';
-        
+    function parseDate(dateValue) {
+        if (!dateValue) return null;
+        if (Array.isArray(dateValue) && dateValue.length >= 3) {
+            const [year, month, day] = dateValue;
+            return new Date(year, month - 1, day);
+        }
         if (typeof dateValue === 'string' && dateValue.match(/^\d{4}-\d{2}-\d{2}/)) {
-            const [year, month, day] = dateValue.split('-');
-            return `${day}/${month}/${year}`;
+            const [year, month, day] = dateValue.split('T')[0].split('-');
+            return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
         }
-        
-        if (dateValue instanceof Date && !isNaN(dateValue)) {
-            const year = dateValue.getFullYear();
-            const month = String(dateValue.getMonth() + 1).padStart(2, '0');
-            const day = String(dateValue.getDate()).padStart(2, '0');
-            return `${day}/${month}/${year}`;
-        }
-        
-        const str = String(dateValue);
-        const parts = str.match(/(\d{4})-(\d{2})-(\d{2})/);
-        if (parts) {
-            return `${parts[3]}/${parts[2]}/${parts[1]}`;
-        }
-        
-        console.warn('Formato de data não reconhecido:', dateValue);
-        return '-';
+        return null;
+    }
+
+    function formatLocalDate(dateValue) {
+        const d = parseDate(dateValue);
+        if (!d || isNaN(d)) return '-';
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${day}/${month}/${year}`;
+    }
+
+    function toISODateString(dateValue) {
+        const d = parseDate(dateValue);
+        if (!d || isNaN(d)) return null;
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 
     const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
@@ -233,6 +293,12 @@
     const recurringDayContainer = document.getElementById('recurringDayContainer');
     const recurringDayInput = document.getElementById('recurringDayInput');
 
+    const filterCategory = document.getElementById('filterCategory');
+    const filterType = document.getElementById('filterType');
+    const filterDateFrom = document.getElementById('filterDateFrom');
+    const filterDateTo = document.getElementById('filterDateTo');
+    const filterCount = document.getElementById('filterCount');
+
     const categories = [
         "Aluguel","Energia","Água","Gás","Internet","Transporte","Alimentação","Saúde","Educação","Lazer",
         "Assinaturas","Compras","Moda","Pet","Hobby","Casa","Viagem","Presentes","Investimentos","Empréstimos",
@@ -241,10 +307,15 @@
 
     const categorySelect = document.getElementById('categorySelect');
     categories.forEach(cat => {
-        const option = document.createElement('option');
-        option.value = cat;
-        option.textContent = cat;
-        categorySelect.appendChild(option);
+        const optForm = document.createElement('option');
+        optForm.value = cat;
+        optForm.textContent = cat;
+        categorySelect.appendChild(optForm);
+
+        const optFilter = document.createElement('option');
+        optFilter.value = cat;
+        optFilter.textContent = cat;
+        filterCategory.appendChild(optFilter);
     });
 
     const today = new Date().toISOString().split('T')[0];
@@ -277,6 +348,67 @@
             recurringDayInput.value = '';
         }
     });
+
+    let allTransactions = [];
+
+    function applyFilters() {
+        const cat = filterCategory.value;
+        const type = filterType.value;
+        const from = filterDateFrom.value;
+        const to = filterDateTo.value;
+
+        const filtered = allTransactions.filter(t => {
+            if (cat && t.category !== cat) return false;
+            if (type && t.type !== type) return false;
+            const iso = toISODateString(t.date);
+            if (from && iso && iso < from) return false;
+            if (to && iso && iso > to) return false;
+            return true;
+        });
+
+        const isFiltered = cat || type || from || to;
+        if (isFiltered) {
+            filterCount.textContent = `${filtered.length} de ${allTransactions.length} lançamento${allTransactions.length !== 1 ? 's' : ''}`;
+            filterCount.classList.remove('hidden');
+        } else {
+            filterCount.classList.add('hidden');
+        }
+
+        renderRows(filtered);
+    }
+
+    function renderRows(transactions) {
+        if (!transactions.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500 dark:text-gray-400">Nenhum lançamento encontrado.</td></tr>';
+            return;
+        }
+
+        let html = '';
+        transactions.forEach(t => {
+            const amountClass = t.type === 'RECEITA' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+            const typeIcon = t.type === 'RECEITA' ? 'trending-up' : 'trending-down';
+            const recurringBadge = t.recurring ? ' <span class="ml-2 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded">Recorrente</span>' : '';
+            html += `
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">${escapeHtml(t.description || '-')} ${recurringBadge}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${amountClass}">${currencyFormatter.format(t.amount)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        <div class="flex items-center gap-1"><i data-lucide="${typeIcon}" class="w-4 h-4"></i>${t.type === 'RECEITA' ? 'Receita' : 'Despesa'}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">${escapeHtml(t.category)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">${formatLocalDate(t.date)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                        <button class="delete-btn text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300" data-id="${t.id}">
+                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+        lucide.createIcons();
+        attachDeleteEvents();
+    }
 
     function attachDeleteEvents() {
         document.querySelectorAll('.delete-btn').forEach(btn => {
@@ -315,38 +447,8 @@
                 headers: { [csrfHeader]: csrfToken }
             });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const transactions = await response.json();
-
-            if (!transactions.length) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500 dark:text-gray-400">Nenhum lançamento encontrado.</td></tr>';
-                return;
-            }
-
-            let html = '';
-            transactions.forEach(t => {
-                const amountClass = t.type === 'RECEITA' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
-                const typeIcon = t.type === 'RECEITA' ? 'trending-up' : 'trending-down';
-                const recurringBadge = t.recurring ? ' <span class="ml-2 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-0.5 rounded">Recorrente</span>' : '';
-                html += `
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">${escapeHtml(t.description || '-')} ${recurringBadge}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${amountClass}">${currencyFormatter.format(t.amount)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                            <div class="flex items-center gap-1"><i data-lucide="${typeIcon}" class="w-4 h-4"></i>${t.type === 'RECEITA' ? 'Receita' : 'Despesa'}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">${escapeHtml(t.category)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">${formatLocalDate(t.date)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right">
-                            <button class="delete-btn text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300" data-id="${t.id}">
-                                <i data-lucide="trash-2" class="w-5 h-5"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-            lucide.createIcons();
-            attachDeleteEvents();
+            allTransactions = await response.json();
+            applyFilters();
             return true;
         } catch (err) {
             console.error('Erro ao carregar lançamentos:', err);
@@ -355,6 +457,19 @@
             return false;
         }
     }
+
+    filterCategory.addEventListener('change', applyFilters);
+    filterType.addEventListener('change', applyFilters);
+    filterDateFrom.addEventListener('change', applyFilters);
+    filterDateTo.addEventListener('change', applyFilters);
+
+    document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+        filterCategory.value = '';
+        filterType.value = '';
+        filterDateFrom.value = '';
+        filterDateTo.value = '';
+        applyFilters();
+    });
 
     document.getElementById('newTransactionBtn').onclick = () => {
         modal.classList.remove('hidden');
@@ -435,7 +550,6 @@
         }
     };
 
-    // Carregar dados do usuário (avatar e email)
     async function loadUserData() {
         try {
             const res = await fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } });
