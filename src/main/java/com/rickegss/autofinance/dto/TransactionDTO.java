@@ -9,19 +9,15 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record TransactionDTO (
-
+    Long id,
     String description,
-
     @NotNull(message = "O valor é obrigatório")
     @DecimalMin(value = "0.01", message = "O valor deve ser maior que zero")
     BigDecimal amount,
-
     @NotNull(message = "O tipo é obrigatório")
     TransactionType type,
-
     @NotNull(message = "A categoria é obrigatória")
     String category,
-
     @NotNull(message = "A data é obrigatória")
     @PastOrPresent(message = "A data não pode ser futura")
     LocalDate date,
