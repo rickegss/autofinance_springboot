@@ -259,7 +259,8 @@ async function loadCycleData(cycleIndex) {
         const endDate = new Date(data.cycleEnd + 'T00:00:00');
         
         const labels = [];
-        const values = [];
+        const expenseValues = [];
+        const remainingValues = [];
         const expensesMap = {};
 
         let currentDate = new Date(startDate);
@@ -282,6 +283,8 @@ async function loadCycleData(cycleIndex) {
             }
         });
 
+        let currentBudget = data.savings + data.totalExpenses;
+
         currentDate = new Date(startDate);
         while (currentDate <= endDate) {
             const y = currentDate.getFullYear();
@@ -289,7 +292,12 @@ async function loadCycleData(cycleIndex) {
             const d = String(currentDate.getDate()).padStart(2, '0');
             const dateString = `${y}-${m}-${d}`;
             
-            values.push(expensesMap[dateString]);
+            const dailyExpense = expensesMap[dateString];
+            currentBudget -= dailyExpense;
+            
+            expenseValues.push(dailyExpense);
+            remainingValues.push(currentBudget);
+            
             currentDate.setDate(currentDate.getDate() + 1);
         }
 
@@ -301,28 +309,49 @@ async function loadCycleData(cycleIndex) {
             type: 'bar',
             data: {
                 labels: labels,
-                datasets: [{
-                    label: 'Gastos (R$)',
-                    data: values,
-                    backgroundColor: isDark ? '#60a5fa' : '#3b82f6',
-                    borderRadius: 6
-                }]
+                datasets: [
+                    {
+                        label: 'Despesa do Dia (R$)',
+                        data: expenseValues,
+                        backgroundColor: isDark ? '#f87171' : '#ef4444',
+                        stack: 'Stack 0'
+                    },
+                    {
+                        label: 'Saldo Restante (R$)',
+                        data: remainingValues,
+                        backgroundColor: isDark ? '#3b82f640' : '#bfdbfe',
+                        stack: 'Stack 0',
+                        borderRadius: { topLeft: 4, topRight: 4 }
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
                 plugins: {
-                    tooltip: { callbacks: { label: (ctx) => formatter.format(ctx.raw) } },
+                    tooltip: { 
+                        mode: 'index',
+                        callbacks: { label: (ctx) => `${ctx.dataset.label}: ${formatter.format(ctx.raw)}` } 
+                    },
                     legend: { labels: { color: isDark ? '#e5e7eb' : '#1f2937' } }
                 },
                 scales: {
-                    y: { beginAtZero: true, ticks: { callback: (val) => formatter.format(val) }, grid: { color: isDark ? '#374151' : '#e5e7eb' } },
-                    x: { title: { display: true, text: 'Dia do mês', color: isDark ? '#e5e7eb' : '#1f2937' }, ticks: { color: isDark ? '#e5e7eb' : '#1f2937' } }
+                    x: { 
+                        stacked: true,
+                        title: { display: true, text: 'Dia do mês', color: isDark ? '#e5e7eb' : '#1f2937' }, 
+                        ticks: { color: isDark ? '#e5e7eb' : '#1f2937' } 
+                    },
+                    y: { 
+                        stacked: true,
+                        beginAtZero: true, 
+                        ticks: { callback: (val) => formatter.format(val) }, 
+                        grid: { color: isDark ? '#374151' : '#e5e7eb' } 
+                    }
                 }
             }
         });
         document.getElementById('dailyChartContainer').classList.remove('hidden');
-
+      
         const tbody = document.getElementById('transactionsTableBody');
         if (transacoes.length > 0) {
             let html = '';
