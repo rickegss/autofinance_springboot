@@ -40,14 +40,18 @@ public class TransactionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Transaction>> findAll(Principal principal) {
-        List<Transaction> transactions = transactionService.findAllByUser(principal.getName());
+    public ResponseEntity<List<TransactionDTO>> findAll(Principal principal) {
+        List<TransactionDTO> transactions = transactionService.findAllByUser(principal.getName()).stream()
+                .map(this::convertToDTO)
+                .toList();
         return ResponseEntity.ok(transactions);
     }
 
     @GetMapping("/month")
-    public ResponseEntity<List<Transaction>> findByMonth(@RequestParam int year, @RequestParam int month, Principal principal) {
-        List<Transaction> transactions = transactionService.findByUserAndMonth(principal.getName(), year, month);
+    public ResponseEntity<List<TransactionDTO>> findByMonth(@RequestParam int year, @RequestParam int month, Principal principal) {
+        List<TransactionDTO> transactions = transactionService.findByUserAndMonth(principal.getName(), year, month).stream()
+                .map(this::convertToDTO)
+                .toList();
         return ResponseEntity.ok(transactions);
     }
 
@@ -100,8 +104,13 @@ public class TransactionController {
                 .limit(5)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
+        List<TransactionDTO> transactionDTOs = transactions.stream()
+                .map(this::convertToDTO)
+                .toList();
+
         CycleDataDTO dto = new CycleDataDTO(cycle.start(), cycle.end(), totalIncome, totalExpenses, savings,
-                savingsPercentage, expensesPercentage, expensesByCategory, transactions);
+                savingsPercentage, expensesPercentage, expensesByCategory, transactionDTOs);
+        
         return ResponseEntity.ok(dto);
     }
 
@@ -156,16 +165,7 @@ public class TransactionController {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getKey, (e1, e2) -> e1, LinkedHashMap::new));
 
         List<TransactionDTO> transactionDTOs = transactions.stream()
-                .map(t -> new TransactionDTO(
-                        t.getDescription(), 
-                        t.getAmount(), 
-                        t.getType(), 
-                        t.getCategory(), 
-                        t.getDate(), 
-                        t.getRecurring(), 
-                        t.getRecurringDay(), 
-                        t.getRecurringEndDate()
-                ))
+                .map(this::convertToDTO)
                 .toList();
 
         CycleDataDTO dto = new CycleDataDTO(start, end, totalIncome, totalExpenses, savings,
@@ -180,4 +180,19 @@ public class TransactionController {
                 .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
+    private TransactionDTO convertToDTO(Transaction t) {
+        return new TransactionDTO(
+                t.getDescription(),
+                t.getAmount(),
+                t.getType(),
+                t.getCategory(),
+                t.getDate(),
+                t.getRecurring(),
+                t.getRecurringDay(),
+                t.getRecurringEndDate()
+        );
+    }
 }
+
+```
