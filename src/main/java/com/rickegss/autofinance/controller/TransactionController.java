@@ -162,7 +162,7 @@ public class TransactionController {
         expensesByCategory = expensesByCategory.entrySet().stream()
                 .sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
                 .limit(5)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getKey, (e1, e2) -> e1, LinkedHashMap::new));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
         List<TransactionDTO> transactionDTOs = transactions.stream()
                 .map(this::convertToDTO)
