@@ -24,4 +24,8 @@ public record TransactionDTO (
     Boolean recurring,
     Integer recurringDay,
     LocalDate recurringEndDate
-) {}
+) {
+    public TransactionDTO(String description, BigDecimal amount, TransactionType type, String category, LocalDate date, Boolean recurring, Integer recurringDay, LocalDate recurringEndDate) {
+        this(null, description, amount, type, category, date, recurring, recurringDay, recurringEndDate);
+    }
+}
