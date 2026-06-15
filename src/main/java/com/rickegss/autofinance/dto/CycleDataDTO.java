@@ -1,6 +1,5 @@
 package com.rickegss.autofinance.dto;
 
-import com.rickegss.autofinance.entity.Transaction;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -15,5 +14,5 @@ public record CycleDataDTO(
         BigDecimal savingsPercentage,
         BigDecimal expensesPercentage,
         Map<String, BigDecimal> expensesByCategory,
-        List<Transaction> transactions
+        List<TransactionDTO> transactions
 ) {}
