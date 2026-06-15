@@ -121,11 +121,13 @@ public class TransactionController {
     }
 
     @GetMapping("/cycle-data")
-    public ResponseEntity<CycleDataDTO> getCycleData(@RequestParam String start, @RequestParam String end, Principal principal) {
+    public ResponseEntity<CycleDataDTO> getCycleData(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
+            Principal principal) {
+        
         User user = userService.findByEmail(principal.getName());
-        LocalDate startDate = LocalDate.parse(start);
-        LocalDate endDate = LocalDate.parse(end);
-        List<Transaction> transactions = transactionRepository.findByUserAndDateBetweenOrderByDateDesc(user, startDate, endDate);
+        List<Transaction> transactions = transactionRepository.findByUserAndDateBetweenOrderByDateDesc(user, start, end);
 
         BigDecimal totalIncome = sumByType(transactions, TransactionType.RECEITA);
         BigDecimal totalExpenses = sumByType(transactions, TransactionType.DESPESA);
@@ -135,6 +137,7 @@ public class TransactionController {
 
         BigDecimal expensesPercentage = BigDecimal.ZERO;
         BigDecimal savingsPercentage = BigDecimal.ZERO;
+        
         if (effectiveIncome.compareTo(BigDecimal.ZERO) > 0) {
             expensesPercentage = totalExpenses.multiply(BigDecimal.valueOf(100))
                     .divide(effectiveIncome, 2, RoundingMode.HALF_UP);
@@ -146,13 +149,28 @@ public class TransactionController {
                 .filter(t -> t.getType() == TransactionType.DESPESA)
                 .collect(Collectors.groupingBy(Transaction::getCategory,
                         Collectors.reducing(BigDecimal.ZERO, Transaction::getAmount, BigDecimal::add)));
+        
         expensesByCategory = expensesByCategory.entrySet().stream()
                 .sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
                 .limit(5)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getKey, (e1, e2) -> e1, LinkedHashMap::new));
 
-        CycleDataDTO dto = new CycleDataDTO(startDate, endDate, totalIncome, totalExpenses, savings,
-                savingsPercentage, expensesPercentage, expensesByCategory, transactions);
+        List<TransactionDTO> transactionDTOs = transactions.stream()
+                .map(t -> new TransactionDTO(
+                        t.getDescription(), 
+                        t.getAmount(), 
+                        t.getType(), 
+                        t.getCategory(), 
+                        t.getDate(), 
+                        t.getRecurring(), 
+                        t.getRecurringDay(), 
+                        t.getRecurringEndDate()
+                ))
+                .toList();
+
+        CycleDataDTO dto = new CycleDataDTO(start, end, totalIncome, totalExpenses, savings,
+                savingsPercentage, expensesPercentage, expensesByCategory, transactionDTOs);
+        
         return ResponseEntity.ok(dto);
     }
 
