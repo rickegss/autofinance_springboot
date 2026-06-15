@@ -234,60 +234,63 @@
     }
 
     async function loadUserAndInit() {
-        try {
-            const res = await fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } });
-            if (!res.ok) throw new Error();
-            const user = await res.json();
-            
-            setGreeting(user.name || user.email);
-            
-            const avatarDiv = document.getElementById('user-avatar');
-            if (user.avatarBase64) {
-                avatarDiv.style.backgroundImage = `url(data:image/jpeg;base64,${user.avatarBase64})`;
-                avatarDiv.style.backgroundSize = 'cover';
-                avatarDiv.textContent = '';
-            } else {
-                avatarDiv.textContent = (user.name ? user.name.charAt(0) : user.email.charAt(0)).toUpperCase();
-                avatarDiv.style.backgroundImage = '';
-            }
-            
-            document.getElementById('user-email-display').textContent = user.name || user.email;
-            document.getElementById('card-income').textContent = formatter.format(user.monthlyIncome || 0);
-            userMonthlyIncome = user.monthlyIncome || 0;
-            const paymentDay = user.financialMonthDay || 1;
-            
-            const selector = document.getElementById('cycleSelector');
-            selector.innerHTML = '';
-            
-            let currentRef = new Date();
-            let initialStart, initialEnd;
-
-            for (let i = 0; i <= 5; i++) {
-                const { start, end } = getCycleDates(paymentDay, currentRef);
-                
-                if (i === 0) {
-                    initialStart = start;
-                    initialEnd = end;
-                }
-                
-                const label = `( ${formatCycleLabel(start, end).toLowerCase()} )`;
-                const option = document.createElement('option');
-                option.value = `${start.toISOString()}|${end.toISOString()}`;
-                option.textContent = i === 0 ? `Ciclo atual ${label}` : label;
-                if (i === 0) option.selected = true;
-                selector.appendChild(option);
-                
-                currentRef = new Date(start.getFullYear(), start.getMonth(), start.getDate() - 5);
-            }
-            
-            document.getElementById('current-date').innerHTML = `Ciclo: ${formatCycleLabel(initialStart, initialEnd)}`;
-            
-            return { start: initialStart, end: initialEnd, paymentDay };
-        } catch (e) {
-            console.error(e);
-            return null;
+    try {
+        const res = await fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } });
+        if (!res.ok) throw new Error();
+        const user = await res.json();
+        
+        setGreeting(user.name || user.email);
+        
+        const avatarDiv = document.getElementById('user-avatar');
+        if (user.avatarBase64) {
+            avatarDiv.style.backgroundImage = `url(data:image/jpeg;base64,${user.avatarBase64})`;
+            avatarDiv.style.backgroundSize = 'cover';
+            avatarDiv.textContent = '';
+        } else {
+            avatarDiv.textContent = (user.name ? user.name.charAt(0) : user.email.charAt(0)).toUpperCase();
+            avatarDiv.style.backgroundImage = '';
         }
+        
+        document.getElementById('user-email-display').textContent = user.name || user.email;
+        
+        userMonthlyIncome = parseFloat(user.monthlyIncome) || 0;
+        
+        document.getElementById('card-income').textContent = formatter.format(userMonthlyIncome);
+        
+        const paymentDay = user.financialMonthDay || 1;
+        
+        const selector = document.getElementById('cycleSelector');
+        selector.innerHTML = '';
+        
+        let currentRef = new Date();
+        let initialStart, initialEnd;
+
+        for (let i = 0; i <= 5; i++) {
+            const { start, end } = getCycleDates(paymentDay, currentRef);
+            
+            if (i === 0) {
+                initialStart = start;
+                initialEnd = end;
+            }
+            
+            const label = `( ${formatCycleLabel(start, end).toLowerCase()} )`;
+            const option = document.createElement('option');
+            option.value = `${start.toISOString()}|${end.toISOString()}`;
+            option.textContent = i === 0 ? `Ciclo atual ${label}` : label;
+            if (i === 0) option.selected = true;
+            selector.appendChild(option);
+            
+            currentRef = new Date(start.getFullYear(), start.getMonth(), start.getDate() - 5);
+        }
+        
+        document.getElementById('current-date').innerHTML = `Ciclo: ${formatCycleLabel(initialStart, initialEnd)}`;
+        
+        return { start: initialStart, end: initialEnd, paymentDay };
+    } catch (e) {
+        console.error(e);
+        return null;
     }
+}
 
     function drawBubbles(categoryMap, totalExpenses) {
         const container = document.getElementById('bubble-container');
