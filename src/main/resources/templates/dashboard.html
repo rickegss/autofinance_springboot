@@ -423,7 +423,14 @@
             document.getElementById('savings-bar').style.width = `${Math.min(savingsPercent, 100)}%`;
         }, 300);
 
-        const categoryMap = new Map(Object.entries(data.expensesByCategory || {}));
+        const categoryMap = new Map();
+        (data.transactions || []).forEach(tx => {
+            if (tx.type === 'DESPESA') {
+                const amount = parseFloat(tx.amount);
+                categoryMap.set(tx.category, (categoryMap.get(tx.category) || 0) + amount);
+            }
+        });
+        
         drawBubbles(categoryMap, data.totalExpenses);
     } catch (e) {
         console.error(e);
