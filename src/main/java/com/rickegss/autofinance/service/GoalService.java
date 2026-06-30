@@ -1,6 +1,7 @@
 package com.rickegss.autofinance.service;
 
 import com.rickegss.autofinance.dto.GoalDTO;
+import com.rickegss.autofinance.dto.GoalUpdateDTO;
 import com.rickegss.autofinance.entity.Goal;
 
 import java.math.BigDecimal;
