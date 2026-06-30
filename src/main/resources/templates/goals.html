@@ -147,6 +147,32 @@
     </div>
 </div>
 
+<!-- Modal para atualizar meta -->
+<div id="updateGoalModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-6 relative">
+        <button id="closeUpdateModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+            <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+        <h3 class="text-xl font-bold text-[#1a1a2e] dark:text-white mb-4">Atualizar Meta</h3>
+        <form id="updateGoalForm" data-spa>
+            <input type="hidden" id="updateGoalId">
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome da meta *</label>
+                <input type="text" id="updateGoalName" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 dark:text-white">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valor alvo (R$) *</label>
+                <input type="number" id="updateTargetAmount" step="0.01" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 dark:text-white">
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" id="cancelUpdateModalBtn" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-[#1a1aff] dark:bg-blue-600 text-white rounded-lg hover:bg-[#0f0fcc] dark:hover:bg-blue-700">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script th:src="@{/js/theme.js}"></script>
 <script th:src="@{/js/transitions.js}"></script>
 <script th:inline="javascript">
@@ -201,6 +227,12 @@
                                 <button class="delete-goal-btn text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300" data-id="${goal.id}">
                                     <i data-lucide="trash-2" class="w-5 h-5"></i>
                                 </button>
+                                <button class="edit-goal-btn text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300" 
+                                        data-id="${goal.id}" 
+                                        data-name="${escapeHtml(goal.name)}" 
+                                        data-target="${goal.targetAmount}">
+                                    <i data-lucide="pencil" class="w-5 h-5"></i>
+                                </button>
                             </div>
                         </div>
                         <div class="mb-2">
@@ -234,6 +266,10 @@
         document.querySelectorAll('.delete-goal-btn').forEach(btn => {
             btn.removeEventListener('click', deleteGoalHandler);
             btn.addEventListener('click', deleteGoalHandler);
+        });
+        document.querySelectorAll('.edit-goal-btn').forEach(btn => {
+            btn.removeEventListener('click', editGoalHandler);
+            btn.addEventListener('click', editGoalHandler);
         });
     }
 
@@ -287,6 +323,19 @@
         }
     }
 
+    function editGoalHandler(e) {
+        const btn = e.currentTarget;
+        const id = btn.getAttribute('data-id');
+        const name = btn.getAttribute('data-name');
+        const target = btn.getAttribute('data-target');
+    
+        document.getElementById('updateGoalId').value = id;
+        document.getElementById('updateGoalName').value = name;
+        document.getElementById('updateTargetAmount').value = target;
+    
+        document.getElementById('updateGoalModal').classList.remove('hidden');
+    }
+
     function escapeHtml(str) {
         if (!str) return '';
         return str.replace(/[&<>]/g, function(m) {
@@ -304,6 +353,9 @@
     };
     document.getElementById('closeModalBtn').onclick = () => createModal.classList.add('hidden');
     document.getElementById('cancelModalBtn').onclick = () => createModal.classList.add('hidden');
+    document.getElementById('closeUpdateModalBtn').onclick = () => document.getElementById('updateGoalModal').classList.add('hidden');
+    document.getElementById('cancelUpdateModalBtn').onclick = () => document.getElementById('updateGoalModal').classList.add('hidden');
+
 
     createForm.onsubmit = async (e) => {
         e.preventDefault();
@@ -353,6 +405,47 @@
     document.getElementById('closeProgressModalBtn').onclick = () => progressModal.classList.add('hidden');
     document.getElementById('cancelProgressBtn').onclick = () => progressModal.classList.add('hidden');
 
+    document.getElementById('updateGoalForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+    
+        const id = document.getElementById('updateGoalId').value;
+        const name = document.getElementById('updateGoalName').value.trim();
+        const target = document.getElementById('updateTargetAmount').value.trim();
+    
+        const payload = {};
+        if (name) payload.name = name;
+        if (target && !isNaN(parseFloat(target)) && parseFloat(target) > 0) {
+            payload.targetAmount = parseFloat(target);
+        }
+    
+        if (Object.keys(payload).length === 0) {
+            showMessage('Nenhuma alteração foi feita.', 'error');
+            return;
+        }
+    
+        try {
+            const response = await fetch(`/api/goals/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify(payload)
+            });
+    
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || 'Erro ao atualizar meta');
+            }
+    
+            showMessage('Meta atualizada com sucesso!', 'success');
+            document.getElementById('updateGoalModal').classList.add('hidden');
+            loadGoals();
+        } catch (err) {
+            showMessage(err.message, 'error');
+        }
+    });
+
     async function loadUserData() {
         try {
             const res = await fetch('/api/user/me', { headers: { [csrfHeader]: csrfToken } });
@@ -371,6 +464,8 @@
             }
         } catch (e) { console.warn(e); }
     }
+
+    
 
     loadUserData();
     loadGoals();
