@@ -224,14 +224,11 @@
                                 <button class="add-progress-btn text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300" data-id="${goal.id}" data-name="${escapeHtml(goal.name)}" data-current="${goal.currentAmount}" data-target="${goal.targetAmount}">
                                     <i data-lucide="plus-circle" class="w-5 h-5"></i>
                                 </button>
+                                <button class="edit-goal-btn text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300" data-id="${goal.id}" data-name="${escapeHtml(goal.name)}" data-target="${goal.targetAmount}">
+                                    <i data-lucide="pencil" class="w-5 h-5"></i>
+                                </button>
                                 <button class="delete-goal-btn text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300" data-id="${goal.id}">
                                     <i data-lucide="trash-2" class="w-5 h-5"></i>
-                                </button>
-                                <button class="edit-goal-btn text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300" 
-                                        data-id="${goal.id}" 
-                                        data-name="${escapeHtml(goal.name)}" 
-                                        data-target="${goal.targetAmount}">
-                                    <i data-lucide="pencil" class="w-5 h-5"></i>
                                 </button>
                             </div>
                         </div>
