@@ -67,4 +67,21 @@ public class GoalServiceImpl implements GoalService{
         return goalRepository.save(goal);
     }
 
+    @Override
+    @Transactional
+    public Goal update(Long goalId, String userEmail, GoalUpdateDTO dto) {
+        User user = findUserByEmail(userEmail);
+    
+        Goal goal = goalRepository.findByIdAndUser(goalId, user)
+                .orElseThrow(() -> new AccessDeniedException("Goal not found or access denied"));
+    
+        if (dto.name() != null && !dto.name().isBlank()) {
+            goal.setName(dto.name());
+        }
+        if (dto.targetAmount() != null) {
+            goal.setTargetAmount(dto.targetAmount());
+        }
+    
+        return goalRepository.save(goal);
+    }
 }
