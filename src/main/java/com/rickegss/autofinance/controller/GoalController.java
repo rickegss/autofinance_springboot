@@ -58,4 +58,13 @@ public class GoalController {
         goalService.delete(id, principal.getName());
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Goal> update(
+        @PathVariable Long id,
+        @Valid @RequestBody GoalUpdateDTO dto,
+        Principal principal) {
+    Goal updated = goalService.update(id, principal.getName(), dto);
+    return ResponseEntity.ok(updated);
+    }
 }
