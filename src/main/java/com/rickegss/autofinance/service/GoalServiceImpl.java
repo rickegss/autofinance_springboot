@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import com.rickegss.autofinance.repository.UserRepository;
 import org.springframework.security.access.AccessDeniedException;
+import com.rickegss.autofinance.dto.GoalUpdateDTO;
 import java.util.List;
 
 @Service
