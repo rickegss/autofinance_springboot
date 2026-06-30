@@ -11,4 +11,5 @@ public interface GoalService {
     List<Goal> findAllByUser(String userEmail);
     Goal addProgress(Long goalId, String userEmail, BigDecimal amount);
     void delete(Long goalId, String userEmail);
+    Goal update(Long goalId, String userEmail, GoalUpdateDTO dto);
 }
