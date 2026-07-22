@@ -1,26 +1,33 @@
 package com.rickegss.autofinance.service;
 
 import com.rickegss.autofinance.dto.GoalDTO;
+import com.rickegss.autofinance.dto.TransactionDTO;
+import com.rickegss.autofinance.dto.WithdrawDTO;
 import com.rickegss.autofinance.entity.Goal;
+import com.rickegss.autofinance.entity.TransactionType;
 import com.rickegss.autofinance.entity.User;
 import com.rickegss.autofinance.repository.GoalRepository;
 import com.rickegss.autofinance.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cglib.core.Local;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,6 +35,9 @@ class GoalServiceImplTest {
 
     @Mock
     private GoalRepository goalRepository;
+
+    @Mock
+    private TransactionService transactionService;
 
     @Mock
     private UserRepository userRepository;
@@ -166,4 +176,31 @@ class GoalServiceImplTest {
 
         verify(goalRepository, never()).delete(any());
     }
+
+    @Test
+    void withdraw_shouldSubtractAmountAndCreateTransaction() {
+        when(userRepository.findByEmail("user@test.com"))
+                .thenReturn(Optional.of(user));
+        when(goalRepository.findByIdAndUser(1L, user))
+                .thenReturn(Optional.of(goal));
+
+        WithdrawDTO dto = new WithdrawDTO(BigDecimal.valueOf(500.00), LocalDate.now(), "Teste de Saque");
+
+
+        Goal result = goalService.withdraw(1L, "user@test.com", dto);
+
+        assertThat(result.getCurrentAmount()).isEqualByComparingTo(BigDecimal.valueOf(2700.00));
+
+        ArgumentCaptor<TransactionDTO> captor = ArgumentCaptor.forClass(TransactionDTO.class);
+        verify(transactionService, times(1)).create(eq("user@test.com"), captor.capture());
+
+        TransactionDTO tx = captor.getValue();
+        assertThat(tx.amount()).isEqualByComparingTo(BigDecimal.valueOf(500.00));
+        assertThat(tx.type()).isEqualTo(TransactionType.RECEITA);
+        assertThat(tx.category()).isEqualTo("Poupança");
+        assertThat(tx.description()).isEqualTo("Teste de Saque");
+        assertThat(tx.date()).isEqualTo(LocalDate.now());
+    }
+
+
 }
