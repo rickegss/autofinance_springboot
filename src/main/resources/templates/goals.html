@@ -111,11 +111,11 @@
             </div>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valor alvo (R$) *</label>
-                <input type="number" id="targetAmount" step="0.01" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 dark:text-white">
+                <input type="number" id="targetAmount" step="any" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 dark:text-white">
             </div>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valor atual (R$)</label>
-                <input type="number" id="currentAmount" step="0.01" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 dark:text-white" placeholder="0,00">
+                <input type="number" id="currentAmount" step="any" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 dark:text-white" placeholder="0,00">
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Se não informado, iniciará em R$ 0,00</p>
             </div>
             <div class="flex justify-end gap-2">
@@ -137,7 +137,7 @@
         <form id="progressForm" data-spa>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valor a adicionar (R$)</label>
-                <input type="number" id="progressAmount" step="0.01" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 dark:text-white">
+                <input type="number" id="progressAmount" step="any" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 dark:text-white">
             </div>
             <div class="flex justify-end gap-2">
                 <button type="button" id="cancelProgressBtn" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Cancelar</button>
@@ -163,7 +163,7 @@
             </div>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valor alvo (R$) *</label>
-                <input type="number" id="updateTargetAmount" step="0.01" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 dark:text-white">
+                <input type="number" id="updateTargetAmount" step="any" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 dark:text-white">
             </div>
             <div class="flex justify-end gap-2">
                 <button type="button" id="cancelUpdateModalBtn" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Cancelar</button>
@@ -172,6 +172,35 @@
         </form>
     </div>
 </div>
+
+<!-- Modal para sacar montante -->
+ <div id="withdrawGoalModal" class = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-6 relative">
+        <button id="closeWithdrawModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+            <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+        <h3 class="text-xl font-bold text-[#1a1a2e] dark:text-white mb-4">Sacar Poupança</h3>
+        <form id="WithdrawGoalForm" data-spa>
+            <input type="hidden" id="WithdrawGoalId">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valor do Saque*</label>
+                <input type="number" id="withdrawGoalAmount" step="any" required class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 dark:text-white">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data da Retirada</label>
+                <input type="date" id="withdrawGoalDate" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 dark:text-white">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Motivo da Retirada</label>
+                <input type="text" id="withdrawGoalDescription" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 dark:text-white">
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" id="cancelWithdrawModalBtn" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-[#1a1aff] dark:bg-blue-600 text-white rounded-lg hover:bg-[#0f0fcc] dark:hover:bg-blue-700">Sacar</button>
+            </div>
+        </form>
+    </div>
+ </div>
 
 <script th:src="@{/js/theme.js}"></script>
 <script th:src="@{/js/transitions.js}"></script>
@@ -186,6 +215,15 @@
     const progressModal = document.getElementById('progressModal');
     const createForm = document.getElementById('goalForm');
     const progressForm = document.getElementById('progressForm');
+    const withdrawModal = document.getElementById('withdrawGoalModal');
+    const withdrawForm = document.getElementById('WithdrawGoalForm');
+    const closeWithdrawModalBtn = document.getElementById('closeWithdrawModalBtn');
+    const cancelWithdrawBtn = document.getElementById('cancelWithdrawModalBtn');
+    const withdrawGoalIdInput = document.getElementById('WithdrawGoalId');
+    const withdrawAmountInput = document.getElementById('withdrawGoalAmount');
+    const withdrawDateInput = document.getElementById('withdrawGoalDate');
+    const withdrawDescriptionInput = document.getElementById('withdrawGoalDescription');
+    let currentWithdrawGoalId = null;
     let currentGoalId = null;
     let currentGoalName = null;
     let currentGoalCurrent = 0;
@@ -230,6 +268,12 @@
                                 <button class="delete-goal-btn text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300" data-id="${goal.id}">
                                     <i data-lucide="trash-2" class="w-5 h-5"></i>
                                 </button>
+                                <button class="withdraw-goal-btn text-orange-600 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-300" 
+                                        data-id="${goal.id}" 
+                                        data-name="${escapeHtml(goal.name)}" 
+                                        data-current="${goal.currentAmount}">
+                                    <i data-lucide="arrow-down-from-bracket" class="w-5 h-5"></i>
+                                </button>
                             </div>
                         </div>
                         <div class="mb-2">
@@ -267,6 +311,10 @@
         document.querySelectorAll('.edit-goal-btn').forEach(btn => {
             btn.removeEventListener('click', editGoalHandler);
             btn.addEventListener('click', editGoalHandler);
+        });
+        document.querySelectorAll('.withdraw-goal-btn').forEach(btn => {
+            btn.removeEventListener('click', withdrawClickHandler);
+            btn.addEventListener('click', withdrawClickHandler);
         });
     }
 
@@ -332,6 +380,28 @@
     
         document.getElementById('updateGoalModal').classList.remove('hidden');
     }
+
+    function openWithdrawModal(goalId, goalName, currentAmount) {
+        currentWithdrawGoalId = goalId;
+        withdrawGoalIdInput.value = goalId;
+        withdrawAmountInput.value = '';
+        withdrawDateInput.value = '';
+        withdrawDescriptionInput.value = '';
+        withdrawModal.classList.remove('hidden');
+    }
+
+    function withdrawClickHandler(e) {
+        const btn = e.currentTarget;
+        const goalId = btn.getAttribute('data-id');
+        const goalName = btn.getAttribute('data-name');
+        const currentAmount = parseFloat(btn.getAttribute('data-current'));
+        openWithdrawModal(goalId, goalName, currentAmount);
+    }
+    closeWithdrawModalBtn.addEventListener('click', () => withdrawModal.classList.add('hidden'));
+    cancelWithdrawBtn.addEventListener('click', () => withdrawModal.classList.add('hidden'));
+    withdrawModal.addEventListener('click', (e) => {
+        if (e.target === withdrawModal) withdrawModal.classList.add('hidden');
+    });     
 
     function escapeHtml(str) {
         if (!str) return '';
@@ -438,6 +508,49 @@
             showMessage('Meta atualizada com sucesso!', 'success');
             document.getElementById('updateGoalModal').classList.add('hidden');
             loadGoals();
+        } catch (err) {
+            showMessage(err.message, 'error');
+        }
+    });
+
+    withdrawForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const amount = parseFloat(withdrawAmountInput.value);
+        if (isNaN(amount) || amount <= 0) {
+            showMessage('Digite um valor válido maior que zero.', 'error');
+            return;
+        }
+
+        if (withdrawDateInput.value && new Date(withdrawDateInput.value) > new Date()) {
+            showMessage('A data não pode ser futura.', 'error');
+            return;
+        }
+
+        const payload = {
+            amount: amount,
+            withdrawDate: withdrawDateInput.value || null,
+            description: withdrawDescriptionInput.value.trim() || null
+        };
+
+        try {
+            const response = await fetch(`/api/goals/${currentWithdrawGoalId}/withdraw`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || 'Erro ao realizar saque.');
+            }
+
+            showMessage('Saque realizado com sucesso!', 'success');
+            withdrawModal.classList.add('hidden');
+            await loadGoals(); 
         } catch (err) {
             showMessage(err.message, 'error');
         }

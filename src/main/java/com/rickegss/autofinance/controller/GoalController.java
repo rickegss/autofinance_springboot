@@ -9,8 +9,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.rickegss.autofinance.dto.GoalUpdateDTO;
+import com.rickegss.autofinance.dto.WithdrawDTO;
+
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.List;
@@ -22,6 +25,7 @@ public class GoalController {
 
     private final GoalService goalService;
 
+    @Validated
     @PostMapping
     public ResponseEntity<Goal> create(
             @Valid @RequestBody GoalDTO dto,
@@ -31,12 +35,14 @@ public class GoalController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+    @Validated
     @GetMapping
     public ResponseEntity<List<Goal>> findAll(Principal principal) {
         List<Goal> goals = goalService.findAllByUser(principal.getName());
         return ResponseEntity.ok(goals);
     }
 
+    @Validated
     @PatchMapping("/{id}/progress")
     public ResponseEntity<Goal> addProgress(
             @PathVariable Long id,
@@ -50,6 +56,7 @@ public class GoalController {
         return ResponseEntity.ok(updated);
     }
 
+    @Validated
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable Long id,
@@ -59,6 +66,7 @@ public class GoalController {
         return ResponseEntity.noContent().build();
     }
 
+    @Validated
     @PatchMapping("/{id}")
     public ResponseEntity<Goal> update(
         @PathVariable Long id,
@@ -67,4 +75,18 @@ public class GoalController {
     Goal updated = goalService.update(id, principal.getName(), dto);
     return ResponseEntity.ok(updated);
     }
+
+    @Validated
+    @PatchMapping("/{id}/withdraw")
+    public ResponseEntity<Goal> cashOut(
+        @PathVariable Long id,
+        @Valid @RequestBody WithdrawDTO dto,
+        Principal principal) {
+            
+            Goal goal = goalService.withdraw(id, principal.getName(), dto);
+
+            return ResponseEntity.ok(goal);
+
+        }
+
 }

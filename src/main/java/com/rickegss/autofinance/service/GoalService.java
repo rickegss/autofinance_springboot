@@ -2,6 +2,7 @@ package com.rickegss.autofinance.service;
 
 import com.rickegss.autofinance.dto.GoalDTO;
 import com.rickegss.autofinance.dto.GoalUpdateDTO;
+import com.rickegss.autofinance.dto.WithdrawDTO;
 import com.rickegss.autofinance.entity.Goal;
 
 import java.math.BigDecimal;
@@ -13,4 +14,5 @@ public interface GoalService {
     Goal addProgress(Long goalId, String userEmail, BigDecimal amount);
     void delete(Long goalId, String userEmail);
     Goal update(Long goalId, String userEmail, GoalUpdateDTO dto);
+    Goal withdraw(Long goalId, String userEmail, WithdrawDTO dto);
 }
