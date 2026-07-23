@@ -26,6 +26,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -183,6 +184,8 @@ class GoalServiceImplTest {
                 .thenReturn(Optional.of(user));
         when(goalRepository.findByIdAndUser(1L, user))
                 .thenReturn(Optional.of(goal));
+        when(goalRepository.save(any(Goal.class)))
+                .thenReturn(goal);
 
         WithdrawDTO dto = new WithdrawDTO(BigDecimal.valueOf(500.00), LocalDate.now(), "Teste de Saque");
 
@@ -202,5 +205,24 @@ class GoalServiceImplTest {
         assertThat(tx.date()).isEqualTo(LocalDate.now());
     }
 
+    @Test
+    void withdraw_shouldThrowWhenAmountExceedsCurrent() {
+        when(userRepository.findByEmail("user@test.com"))
+                .thenReturn(Optional.of(user));
+        when(goalRepository.findByIdAndUser(1L, user))
+                .thenReturn(Optional.of(goal));
 
+        WithdrawDTO dto = new WithdrawDTO(BigDecimal.valueOf(15000.0), LocalDate.now(), "Teste de Saque Acima do Saldo.");
+
+
+        assertThatThrownBy(() -> goalService.withdraw(1L, "user@test.com", dto)).isInstanceOf(IllegalArgumentException.class)
+                                                                                                  .hasMessage("Insuficient funds in goal.");
+        
+
+        verify(goalRepository, never()).save(any());
+        verify(transactionService, never()).create(any(), any());
+    }
+
+    
+    
 }
