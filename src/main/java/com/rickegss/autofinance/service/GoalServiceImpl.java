@@ -13,8 +13,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.rickegss.autofinance.repository.UserRepository;
-
-import org.springframework.cglib.core.Local;
 import org.springframework.security.access.AccessDeniedException;
 import com.rickegss.autofinance.dto.GoalUpdateDTO;
 import com.rickegss.autofinance.dto.TransactionDTO;
