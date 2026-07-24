@@ -78,7 +78,7 @@ public class GoalController {
 
     @Validated
     @PatchMapping("/{id}/withdraw")
-    public ResponseEntity<Goal> cashOut(
+    public ResponseEntity<Goal> withdraw(
         @PathVariable Long id,
         @Valid @RequestBody WithdrawDTO dto,
         Principal principal) {
