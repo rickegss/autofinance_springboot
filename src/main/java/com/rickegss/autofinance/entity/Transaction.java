@@ -34,8 +34,9 @@ public class Transaction {
     @Column(nullable = false)
     private LocalDate date;
 
-    @Column(name = "is_recurring")
-    private Boolean recurring = false;
+    @Builder.Default
+    @Column(name = "is_recurring", nullable = false)
+    private Boolean recurring = Boolean.FALSE;
 
     @Column(name = "recurring_day")
     private Integer recurringDay;

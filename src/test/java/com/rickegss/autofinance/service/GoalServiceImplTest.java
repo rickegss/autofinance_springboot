@@ -8,6 +8,9 @@ import com.rickegss.autofinance.entity.TransactionType;
 import com.rickegss.autofinance.entity.User;
 import com.rickegss.autofinance.repository.GoalRepository;
 import com.rickegss.autofinance.repository.UserRepository;
+
+import jakarta.persistence.EntityNotFoundException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +18,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cglib.core.Local;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
@@ -26,7 +28,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -223,6 +224,24 @@ class GoalServiceImplTest {
         verify(transactionService, never()).create(any(), any());
     }
 
+    @Test
+    void withdraw_shouldThrowWhenGoalNotFound() {
+        when(userRepository.findByEmail("user@test.com"))
+                .thenReturn(Optional.of(user));
+        when(goalRepository.findByIdAndUser(99L, user))
+                .thenReturn(Optional.empty());
+        WithdrawDTO dto = new WithdrawDTO(BigDecimal.valueOf(15000.0), LocalDate.now(), "Teste de Saque em Meta não Encontrada.");
+
+        assertThatThrownBy(() -> goalService.withdraw(99L, "user@test.com", dto))
+                                                .isInstanceOf(EntityNotFoundException.class)
+                                                .hasMessage("Goal not found with id: 99");
+        
+        verify(goalRepository, never()).save(any());
+        verify(transactionService, never()).create(any(), any());
+
+    }
     
+    
+
     
 }

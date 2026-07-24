@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import java.time.ZoneId;
 import java.util.TimeZone;
 
 @Configuration
