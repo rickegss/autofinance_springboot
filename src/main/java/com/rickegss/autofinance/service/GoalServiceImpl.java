@@ -5,6 +5,8 @@ import com.rickegss.autofinance.entity.Goal;
 import com.rickegss.autofinance.entity.TransactionType;
 import com.rickegss.autofinance.entity.User;
 import com.rickegss.autofinance.repository.GoalRepository;
+
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -99,7 +101,7 @@ public class GoalServiceImpl implements GoalService{
         User user = findUserByEmail(userEmail);
 
         Goal goal = goalRepository.findByIdAndUser(goalId, user)
-                                    .orElseThrow(() -> new AccessDeniedException("Goal not found or access denied."));
+                                    .orElseThrow(() -> new EntityNotFoundException("Goal not found with id: " + goalId));
 
         BigDecimal amount = dto.amount();
 
